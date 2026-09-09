@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CallScribe</string>
+    <string name="accessibility_label">CallScribe — следене на разговори</string>
+    <string name="accessibility_description">Позволява на CallScribe да засича начало и край на телефонен разговор, за да стартира записа. Не чете съдържание на екрана.</string>
+</resources>
