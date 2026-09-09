@@ -47,9 +47,10 @@ jobs:
           NOTES="Инсталируем APK за Android 8.0+. Виж README за настройката след инсталиране."
           if gh release view latest >/dev/null 2>&1; then
             gh release upload latest CallScribe.apk --clobber
+            gh release edit latest --prerelease=false --latest
           else
             gh release create latest CallScribe.apk \
               --title "CallScribe — последен билд" \
               --notes "$NOTES" \
-              --prerelease
+              --latest
           fi
