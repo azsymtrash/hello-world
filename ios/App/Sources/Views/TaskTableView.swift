@@ -9,14 +9,14 @@ private enum SortKey: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .created: return "Създадено"
-        case .source: return "Източник"
-        case .contact: return "Контакт"
-        case .title: return "Задача"
-        case .due: return "Краен срок"
-        case .priority: return "Приоритет"
-        case .status: return "Статус"
-        case .confidence: return "Увереност"
+        case .created: return String(localized: "Created")
+        case .source: return String(localized: "Source")
+        case .contact: return String(localized: "Contact")
+        case .title: return String(localized: "Task")
+        case .due: return String(localized: "Due")
+        case .priority: return String(localized: "Priority")
+        case .status: return String(localized: "Status")
+        case .confidence: return String(localized: "Confidence")
         }
     }
 
@@ -67,18 +67,18 @@ struct TaskTableView: View {
                     table
                 }
             }
-            .navigationTitle("Напомняния")
+            .navigationTitle("Reminders")
             .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $query, prompt: "Търсене")
+            .searchable(text: $query, prompt: Text("Search"))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Menu {
-                        Picker("Подреждане", selection: $sortKey) {
+                        Picker("Sort by", selection: $sortKey) {
                             ForEach(SortKey.allCases) { key in
                                 Text(key.label).tag(key)
                             }
                         }
-                        Toggle("Възходящо", isOn: $ascending)
+                        Toggle("Ascending", isOn: $ascending)
                     } label: {
                         Image(systemName: "arrow.up.arrow.down")
                     }
@@ -114,10 +114,10 @@ struct TaskTableView: View {
 
     private var filterBar: some View {
         HStack {
-            Picker("Филтър", selection: $statusFilter) {
-                Text("Отворени").tag(String?.some(TaskState.open))
-                Text("Готови").tag(String?.some(TaskState.done))
-                Text("Всички").tag(String?.none)
+            Picker("Filter", selection: $statusFilter) {
+                Text("Open").tag(String?.some(TaskState.open))
+                Text("Done").tag(String?.some(TaskState.done))
+                Text("All").tag(String?.none)
             }
             .pickerStyle(.segmented)
 
@@ -132,10 +132,10 @@ struct TaskTableView: View {
     private var emptyState: some View {
         VStack(spacing: 8) {
             Spacer()
-            Text(tasks.isEmpty ? "Още няма извлечени задачи." : "Няма редове по този филтър.")
+            Text(tasks.isEmpty ? "No tasks pulled out yet." : "Nothing matches this filter.")
                 .font(.headline)
             if tasks.isEmpty {
-                Text("Задачите се появяват сами, щом добавиш запис или текст в раздел „Източници“.")
+                Text("Tasks appear on their own as soon as you add a recording or text under “Sources”.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -165,7 +165,7 @@ struct TaskTableView: View {
 
     private var header: some View {
         HStack(spacing: 0) {
-            Text("Готово")
+            Text("Done")
                 .frame(width: doneColumnWidth, alignment: .leading)
                 .padding(.horizontal, 6)
             ForEach(SortKey.allCases) { key in
@@ -208,7 +208,7 @@ struct TaskTableView: View {
 
             cell(Formatting.dateTime(task.createdAt), .created, task)
             cell(Formatting.source(task.source), .source, task)
-            cell(task.contactName ?? "—", .contact, task)
+            cell(task.contactName ?? Formatting.emDash, .contact, task)
             cell(task.title, .title, task, lines: 2)
             cell(Formatting.due(task.dueAt, allDay: task.allDay), .due, task,
                  color: task.isOverdue ? .red : nil)

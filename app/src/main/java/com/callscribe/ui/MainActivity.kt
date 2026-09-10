@@ -32,8 +32,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.callscribe.R
 
 class MainActivity : ComponentActivity() {
 
@@ -101,19 +103,19 @@ private fun Root() {
                     selected = tab == 0,
                     onClick = { tab = 0 },
                     icon = { Icon(Icons.Filled.TableChart, contentDescription = null) },
-                    label = { Text("Таблица") }
+                    label = { Text(stringResource(R.string.tab_table)) }
                 )
                 NavigationBarItem(
                     selected = tab == 1,
                     onClick = { tab = 1 },
                     icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                    label = { Text("Източници") }
+                    label = { Text(stringResource(R.string.tab_sources)) }
                 )
                 NavigationBarItem(
                     selected = tab == 2,
                     onClick = { tab = 2 },
                     icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
-                    label = { Text("Настройки") }
+                    label = { Text(stringResource(R.string.tab_settings)) }
                 )
             }
         }

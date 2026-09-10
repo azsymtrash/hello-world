@@ -1,5 +1,7 @@
 package com.callscribe.ai
 
+import android.content.Context
+import com.callscribe.R
 import com.callscribe.data.Capture
 import com.callscribe.data.Kind
 import com.callscribe.data.Priority
@@ -18,7 +20,7 @@ import java.util.Locale
  * Извлича ангажименти/задачи от текст (транскрипция на разговор или SMS)
  * чрез Claude Messages API със структуриран изход (tool use).
  */
-class TaskExtractor(private val settings: Settings) {
+class TaskExtractor(private val context: Context, private val settings: Settings) {
 
     /** Езикът определя на какъв език моделът пише извлечените задачи. */
     private val english: Boolean get() = settings.language == "en"
@@ -75,17 +77,17 @@ class TaskExtractor(private val settings: Settings) {
         Http.client.newCall(builder.build()).execute().use { response ->
             val raw = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
-                throw AiException("Анализът неуспешен (HTTP ${response.code}): ${raw.take(300)}")
+                throw AiException(context.getString(R.string.err_analyze, response.code, raw.take(300)))
             }
             val content = JSONObject(raw).optJSONArray("content")
-                ?: throw AiException("Неочакван отговор от модела.")
+                ?: throw AiException(context.getString(R.string.err_unexpected))
             for (i in 0 until content.length()) {
                 val block = content.optJSONObject(i) ?: continue
                 if (block.optString("type") == "tool_use") {
                     return block.optJSONObject("input") ?: JSONObject()
                 }
             }
-            throw AiException("Моделът не върна структуриран резултат.")
+            throw AiException(context.getString(R.string.err_no_structured))
         }
     }
 

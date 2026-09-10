@@ -3,7 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>bg</string>
+	<string>en</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>bg</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>CallScribe</string>
 	<key>CFBundleExecutable</key>
@@ -23,7 +28,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>За да записва срещи и гласови бележки, които после се превръщат в задачи.</string>
+	<string>So it can record meetings and voice notes and turn them into tasks.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

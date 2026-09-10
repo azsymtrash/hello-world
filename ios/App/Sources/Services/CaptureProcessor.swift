@@ -35,7 +35,7 @@ final class CaptureProcessor {
             if (capture.text?.isEmpty ?? true), let audioURL = capture.audioURL {
                 guard settings.asrConfigured else {
                     finish(capture, status: CaptureStatus.error,
-                           error: "Не е конфигуриран сървър за транскрипция.")
+                           error: String(localized: "No transcription server configured."))
                     return
                 }
                 capture.status = CaptureStatus.transcribing
@@ -54,11 +54,11 @@ final class CaptureProcessor {
             }
 
             guard let text = capture.text, !text.isEmpty else {
-                finish(capture, status: CaptureStatus.error, error: "Няма текст за анализ.")
+                finish(capture, status: CaptureStatus.error, error: String(localized: "No text to analyze."))
                 return
             }
             guard settings.aiConfigured else {
-                finish(capture, status: CaptureStatus.error, error: "Не е конфигуриран API ключ за Claude.")
+                finish(capture, status: CaptureStatus.error, error: String(localized: "No Claude API key configured."))
                 return
             }
 

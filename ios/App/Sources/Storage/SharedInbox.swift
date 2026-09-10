@@ -15,7 +15,7 @@ enum SharedInbox {
         guard let inbox = Paths.sharedInbox else {
             throw NSError(
                 domain: "CallScribe", code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Споделената папка не е налична."]
+                userInfo: [NSLocalizedDescriptionKey: String(localized: "The shared folder is not available.")]
             )
         }
         let url = inbox.appendingPathComponent("\(UUID().uuidString).json")

@@ -11,41 +11,41 @@ struct ConsentView: View {
                 Text("CallScribe")
                     .font(.largeTitle.bold())
 
-                Text("Записва срещи и текстове, превръща ги в текст и извлича от тях задачи с краен срок в таблица с напомняния.")
+                Text("Records meetings and text, turns them into text, and pulls out tasks with deadlines into a table of reminders.")
                     .font(.body)
 
-                Text("Какво това приложение НЕ може на iPhone")
+                Text("What this app cannot do on iPhone")
                     .font(.headline)
                     .padding(.top, 6)
 
-                bullet("iOS не дава достъп до аудиото на телефонен разговор. Няма API за това — нито публично, нито заобиколено.")
-                bullet("Докато тече разговор, системата отнема микрофона на всички приложения. Записът на разговор е невъзможен, дори на високоговорител.")
-                bullet("Няма достъп до Съобщения. Текстовете влизат само когато ти ги споделиш към приложението или ги поставиш.")
+                bullet("iOS gives no access to the audio of a phone call. There is no API for it — neither public nor roundabout.")
+                bullet("While a call is running, the system takes the microphone away from every app. Recording a call is impossible, even on speakerphone.")
+                bullet("There is no access to Messages. Text only comes in when you share it to the app or paste it.")
 
-                Text("Какво прави")
+                Text("What it does")
                     .font(.headline)
                     .padding(.top, 6)
 
-                bullet("Записва срещи и гласови бележки през микрофона.")
-                bullet("Приема текст през бутона за споделяне от Съобщения, Поща, Бележки.")
-                bullet("Транскрибира и извлича задачите автоматично, щом се появи нов източник.")
+                bullet("Records meetings and voice notes through the microphone.")
+                bullet("Takes text through the share button from Messages, Mail and Notes.")
+                bullet("Transcribes and pulls out the tasks on its own as soon as a source appears.")
 
-                Text("Преди да продължиш")
+                Text("Before you continue")
                     .font(.headline)
                     .padding(.top, 6)
 
-                bullet("Записът на чужд глас без съгласие е незаконен в много държави. Отговорността е твоя.")
-                bullet("Транскрипцията и анализът се изпращат към сървърите, които ти конфигурираш. Съдържанието напуска телефона.")
-                bullet("Записите и текстовете се пазят само на този телефон.")
+                bullet("Recording someone else's voice without consent is illegal in many countries. Responsibility is yours.")
+                bullet("Transcription and analysis are sent to the servers you configure. The content leaves the phone.")
+                bullet("Recordings and text stay on this phone only.")
 
                 Toggle(isOn: $accepted) {
-                    Text("Разбирам ограниченията и поемам отговорност за законосъобразната употреба.")
+                    Text("I understand the limits and take responsibility for lawful use.")
                         .font(.footnote)
                 }
                 .padding(.top, 8)
 
                 Button(action: onAccept) {
-                    Text("Разбрах, продължи")
+                    Text("Understood, continue")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
@@ -56,9 +56,9 @@ struct ConsentView: View {
         }
     }
 
-    private func bullet(_ text: String) -> some View {
+    private func bullet(_ text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            Text("•")
+            Text(verbatim: "•")
             Text(text)
         }
         .font(.footnote)

@@ -11,7 +11,7 @@ struct CallScribeApp: App {
         do {
             return try ModelContainer(for: Capture.self, TaskRow.self)
         } catch {
-            fatalError("Базата не може да се отвори: \(error)")
+            fatalError("The database could not be opened: \(error)")
         }
     }()
 

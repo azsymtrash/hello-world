@@ -2,6 +2,7 @@ package com.callscribe.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.callscribe.R
 
 @Composable
 fun ConsentScreen(onAccept: () -> Unit) {
@@ -33,44 +36,40 @@ fun ConsentScreen(onAccept: () -> Unit) {
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("CallScribe", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            "Приложението записва телефонни разговори и чете съобщения, превръща ги в текст " +
-                "и извлича задачи с краен срок в таблица с напомняния.",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.consent_intro), style = MaterialTheme.typography.bodyMedium)
 
         Spacer(Modifier.height(8.dp))
-        Text("Преди да продължиш, прочети следното:", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.consent_heading), style = MaterialTheme.typography.titleMedium)
 
-        Bullet("Записът на разговор без знанието на отсрещната страна е незаконен в много държави. В България записът на собствен разговор е допустим, но разпространението му без съгласие не е. Отговорността е твоя.")
-        Bullet("От Android 10 системата не дава достъп до аудиото на отсрещната страна. На повечето телефони записът минава през микрофона — отсрещната страна се чува ясно само при включен високоговорител.")
-        Bullet("Транскрипцията и анализът се изпращат към конфигурирания от теб сървър. Съдържанието на разговорите ти напуска телефона. Ако това не ти е приемливо, използвай локален сървър за транскрипция.")
-        Bullet("Записите и текстовете се пазят само на този телефон, в частната памет на приложението.")
-        Bullet("Приложението не може да бъде публикувано в Google Play — правилата забраняват запис на разговори и достъп до SMS за приложения, които не са SMS клиент по подразбиране.")
+        Bullet(stringResource(R.string.consent_legal))
+        Bullet(stringResource(R.string.consent_audio))
+        Bullet(stringResource(R.string.consent_network))
+        Bullet(stringResource(R.string.consent_storage))
+        Bullet(stringResource(R.string.consent_store))
 
         Spacer(Modifier.height(8.dp))
-        Row(checked) { checked = it }
+        ConsentCheck(checked) { checked = it }
 
         Button(
             onClick = onAccept,
             enabled = checked,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Разбрах, продължи")
+            Text(stringResource(R.string.consent_continue))
         }
     }
 }
 
 @Composable
-private fun Row(checked: Boolean, onChange: (Boolean) -> Unit) {
-    androidx.compose.foundation.layout.Row(
+private fun ConsentCheck(checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
         Checkbox(checked = checked, onCheckedChange = onChange)
         Text(
-            "Разбирам изискванията и поемам отговорност за законосъобразната употреба.",
+            stringResource(R.string.consent_checkbox),
             style = MaterialTheme.typography.bodySmall
         )
     }
@@ -78,7 +77,7 @@ private fun Row(checked: Boolean, onChange: (Boolean) -> Unit) {
 
 @Composable
 private fun Bullet(text: String) {
-    androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth()) {
+    Row(modifier = Modifier.fillMaxWidth()) {
         Text("•  ", style = MaterialTheme.typography.bodySmall)
         Text(text, style = MaterialTheme.typography.bodySmall)
     }

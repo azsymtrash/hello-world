@@ -2,29 +2,29 @@ import Foundation
 
 enum Formatting {
 
-    private static let locale = Locale(identifier: "bg_BG")
-
-    private static let dateTimeFormatter: DateFormatter = {
+    private static var dateTimeFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = locale
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd.MM.yy HH:mm"
         return formatter
-    }()
+    }
 
-    private static let dateFormatter: DateFormatter = {
+    private static var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = locale
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd.MM.yyyy"
         return formatter
-    }()
+    }
+
+    static let emDash = "—"
 
     static func dateTime(_ date: Date?) -> String {
-        guard let date else { return "—" }
+        guard let date else { return emDash }
         return dateTimeFormatter.string(from: date)
     }
 
     static func due(_ date: Date?, allDay: Bool) -> String {
-        guard let date else { return "—" }
+        guard let date else { return emDash }
         return allDay ? dateFormatter.string(from: date) : dateTimeFormatter.string(from: date)
     }
 
@@ -34,35 +34,35 @@ enum Formatting {
 
     static func source(_ kind: String) -> String {
         switch kind {
-        case Kind.call: return "Запис"
-        case Kind.text: return "Съобщение"
-        default: return "Ръчно"
+        case Kind.call: return String(localized: "Recording")
+        case Kind.text: return String(localized: "Message")
+        default: return String(localized: "Manual")
         }
     }
 
     static func priority(_ value: String) -> String {
         switch value {
-        case Priority.high: return "Висок"
-        case Priority.low: return "Нисък"
-        default: return "Нормален"
+        case Priority.high: return String(localized: "High")
+        case Priority.low: return String(localized: "Low")
+        default: return String(localized: "Normal")
         }
     }
 
     static func status(_ value: String) -> String {
         switch value {
-        case TaskState.done: return "Готово"
-        case TaskState.cancelled: return "Отказано"
-        default: return "Отворено"
+        case TaskState.done: return String(localized: "Done")
+        case TaskState.cancelled: return String(localized: "Cancelled")
+        default: return String(localized: "Open")
         }
     }
 
     static func captureStatus(_ value: String) -> String {
         switch value {
-        case CaptureStatus.new: return "Чака обработка"
-        case CaptureStatus.transcribing: return "Транскрибира се"
-        case CaptureStatus.analyzing: return "Анализира се"
-        case CaptureStatus.done: return "Готово"
-        default: return "Грешка"
+        case CaptureStatus.new: return String(localized: "Waiting to be processed")
+        case CaptureStatus.transcribing: return String(localized: "Transcribing")
+        case CaptureStatus.analyzing: return String(localized: "Analyzing")
+        case CaptureStatus.done: return String(localized: "Done")
+        default: return String(localized: "Error")
         }
     }
 

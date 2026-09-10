@@ -2,10 +2,17 @@ import Foundation
 
 enum CsvExporter {
 
-    private static let headers = [
-        "Създадено", "Източник", "Контакт", "Задача", "Детайли", "Краен срок",
-        "Цял ден", "Приоритет", "Категория", "Статус", "Увереност", "Напомняне", "Цитат"
-    ]
+    private static var headers: [String] {
+        [
+            String(localized: "Created"), String(localized: "Source"),
+            String(localized: "Contact"), String(localized: "Task"),
+            String(localized: "Details"), String(localized: "Due"),
+            String(localized: "All day"), String(localized: "Priority"),
+            String(localized: "Category"), String(localized: "Status"),
+            String(localized: "Confidence"), String(localized: "Reminder"),
+            String(localized: "Quote")
+        ]
+    }
 
     static func csv(for tasks: [TaskRow]) -> String {
         // BOM, за да отвори Excel кирилицата коректно.
@@ -20,7 +27,7 @@ enum CsvExporter {
                 task.title,
                 task.details ?? "",
                 task.dueAt.map { Formatting.due($0, allDay: task.allDay) } ?? "",
-                task.allDay ? "да" : "не",
+                task.allDay ? String(localized: "yes") : String(localized: "no"),
                 Formatting.priority(task.priority),
                 task.category ?? "",
                 Formatting.status(task.status),

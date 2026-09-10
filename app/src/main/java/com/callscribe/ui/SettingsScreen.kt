@@ -32,10 +32,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.callscribe.R
 import com.callscribe.capture.CallWatchAccessibilityService
 import com.callscribe.data.Languages
 
@@ -67,47 +69,46 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        SectionTitle("Заснемане")
+        SectionTitle(stringResource(R.string.section_capture))
 
-        Toggle("Записвай разговорите", recordCalls) {
+        Toggle(stringResource(R.string.setting_record_calls), recordCalls) {
             recordCalls = it
             settings.recordCalls = it
         }
-        Toggle("Включвай високоговорителя при запис", forceSpeaker) {
+        Toggle(stringResource(R.string.setting_force_speaker), forceSpeaker) {
             forceSpeaker = it
             settings.forceSpeaker = it
         }
         Text(
-            "Без високоговорител микрофонът обикновено улавя само твоя глас — Android не дава " +
-                "достъп до аудиото на отсрещната страна.",
+            stringResource(R.string.setting_speaker_note),
             style = MaterialTheme.typography.bodySmall
         )
-        Toggle("Чети входящи съобщения", readSms) {
+        Toggle(stringResource(R.string.setting_read_sms), readSms) {
             readSms = it
             settings.readSms = it
         }
-        Toggle("Засичай новите съобщения автоматично", autoSync) {
+        Toggle(stringResource(R.string.setting_auto_sync), autoSync) {
             autoSync = it
             model.setAutoSync(it)
         }
         Text(
-            "Проверява на всеки 15 минути и при отваряне на приложението. Изключено, " +
-                "новите съобщения влизат само когато натиснеш бутона в „Източници“.",
+            stringResource(R.string.setting_auto_sync_note),
             style = MaterialTheme.typography.bodySmall
         )
-        Toggle("Трий аудиото след транскрипция", deleteAudio) {
+        Toggle(stringResource(R.string.setting_delete_audio), deleteAudio) {
             deleteAudio = it
             settings.deleteAudioAfterTranscript = it
         }
 
         OutlinedButton(onClick = onRequestPermissions, modifier = Modifier.fillMaxWidth()) {
-            Text("Поискай разрешенията наново")
+            Text(stringResource(R.string.request_permissions))
         }
 
         val accessibilityOn = CallWatchAccessibilityService.isEnabled(context)
         Text(
-            if (accessibilityOn) "Услугата за следене на разговори е включена."
-            else "Услугата за следене на разговори е изключена — автоматичният запис няма да тръгва надеждно.",
+            stringResource(
+                if (accessibilityOn) R.string.accessibility_on else R.string.accessibility_off
+            ),
             style = MaterialTheme.typography.bodySmall,
             color = if (accessibilityOn) MaterialTheme.colorScheme.onSurfaceVariant
             else MaterialTheme.colorScheme.error
@@ -116,7 +117,7 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
             onClick = { open(context, AndroidSettings.ACTION_ACCESSIBILITY_SETTINGS) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Настройки за достъпност")
+            Text(stringResource(R.string.open_accessibility))
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -124,18 +125,18 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
                 onClick = { open(context, AndroidSettings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Разреши точни аларми")
+                Text(stringResource(R.string.allow_exact_alarms))
             }
         }
         OutlinedButton(
             onClick = { open(context, AndroidSettings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS) },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Изключи оптимизацията на батерията")
+            Text(stringResource(R.string.ignore_battery))
         }
 
         HorizontalDivider()
-        SectionTitle("Напомняния")
+        SectionTitle(stringResource(R.string.section_reminders))
 
         OutlinedTextField(
             value = offset,
@@ -143,43 +144,39 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
                 offset = it.filter { char -> char.isDigit() }.take(4)
                 settings.reminderOffsetMinutes = offset.toIntOrNull() ?: 30
             },
-            label = { Text("Колко минути преди срока да напомня") },
+            label = { Text(stringResource(R.string.reminder_offset_label)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
         HorizontalDivider()
-        SectionTitle("Анализ (Claude)")
+        SectionTitle(stringResource(R.string.section_analysis))
 
-        Field("Адрес на API", aiBase, { aiBase = it; settings.aiBaseUrl = it })
-        Field("API ключ", aiKey, { aiKey = it; settings.aiApiKey = it }, secret = true)
-        Field("Модел", aiModel, { aiModel = it; settings.aiModel = it })
+        Field(stringResource(R.string.api_address), aiBase, { aiBase = it; settings.aiBaseUrl = it })
+        Field(stringResource(R.string.api_key), aiKey, { aiKey = it; settings.aiApiKey = it }, secret = true)
+        Field(stringResource(R.string.model), aiModel, { aiModel = it; settings.aiModel = it })
         Text(
-            "Ключът се пази в паметта на приложението и не е криптиран. По-безопасно е да " +
-                "насочиш адреса към собствен прокси сървър и да оставиш полето за ключ празно. " +
-                "Модели: claude-opus-5 (най-точен), claude-sonnet-5 (баланс), claude-haiku-4-5 (най-евтин).",
+            stringResource(R.string.ai_note),
             style = MaterialTheme.typography.bodySmall
         )
 
         HorizontalDivider()
-        SectionTitle("Транскрипция")
+        SectionTitle(stringResource(R.string.section_transcription))
 
-        Field("Адрес на сървъра", asrBase, { asrBase = it; settings.asrBaseUrl = it })
-        Field("API ключ", asrKey, { asrKey = it; settings.asrApiKey = it }, secret = true)
-        Field("Модел", asrModel, { asrModel = it; settings.asrModel = it })
+        Field(stringResource(R.string.server_address), asrBase, { asrBase = it; settings.asrBaseUrl = it })
+        Field(stringResource(R.string.api_key), asrKey, { asrKey = it; settings.asrApiKey = it }, secret = true)
+        Field(stringResource(R.string.model), asrModel, { asrModel = it; settings.asrModel = it })
         LanguageSelector(current = language) {
             language = it
             settings.language = it
         }
         Text(
-            "Езикът важи и за двете стъпки: подава се на сървъра за транскрипция и определя " +
-                "на какъв език моделът пише извлечените задачи.",
+            stringResource(R.string.language_note),
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            "Очаква се OpenAI-съвместим endpoint POST {адрес}/v1/audio/transcriptions. " +
-                "Работи с whisper.cpp сървър в локалната мрежа, ако не искаш аудиото да напуска дома ти.",
+            stringResource(R.string.asr_note),
             style = MaterialTheme.typography.bodySmall
         )
 
@@ -193,7 +190,7 @@ private fun LanguageSelector(current: String, onSelect: (String) -> Unit) {
 
     Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
-            Text("Език: ${Languages.label(current)}")
+            Text(stringResource(R.string.language_label, Languages.label(current)))
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             Languages.all.forEach { option ->

@@ -16,17 +16,17 @@ class CallScribeApp : Application() {
         manager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_CAPTURE,
-                "Запис на разговори",
+                getString(R.string.channel_capture),
                 NotificationManager.IMPORTANCE_LOW
-            ).apply { description = "Показва се, докато тече запис." }
+            ).apply { description = getString(R.string.channel_capture_desc) }
         )
 
         manager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_REMINDERS,
-                "Напомняния",
+                getString(R.string.channel_reminders),
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = "Напомняния за задачите от разговори и съобщения." }
+            ).apply { description = getString(R.string.channel_reminders_desc) }
         )
 
         // Фоновото засичане тръгва само по себе си при всяко стартиране на процеса.

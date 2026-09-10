@@ -7,6 +7,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.callscribe.R
 import com.callscribe.ai.TaskExtractor
 import com.callscribe.ai.Transcriber
 import com.callscribe.data.AppDatabase
@@ -36,11 +37,11 @@ class ProcessCaptureWorker(
         try {
             if (capture.text.isNullOrBlank() && !capture.audioPath.isNullOrBlank()) {
                 if (!settings.asrConfigured) {
-                    dao.update(capture.copy(status = CaptureStatus.ERROR, error = "Не е конфигуриран сървър за транскрипция."))
+                    dao.update(capture.copy(status = CaptureStatus.ERROR, error = context.getString(R.string.err_no_asr)))
                     return@withContext Result.success()
                 }
                 dao.update(capture.copy(status = CaptureStatus.TRANSCRIBING, error = null))
-                val transcript = Transcriber(settings).transcribe(File(capture.audioPath!!))
+                val transcript = Transcriber(context, settings).transcribe(File(capture.audioPath!!))
                 capture = capture.copy(text = transcript, status = CaptureStatus.ANALYZING)
                 dao.update(capture)
 
@@ -53,17 +54,17 @@ class ProcessCaptureWorker(
 
             val text = capture.text
             if (text.isNullOrBlank()) {
-                dao.update(capture.copy(status = CaptureStatus.ERROR, error = "Няма текст за анализ."))
+                dao.update(capture.copy(status = CaptureStatus.ERROR, error = context.getString(R.string.err_no_text)))
                 return@withContext Result.success()
             }
 
             if (!settings.aiConfigured) {
-                dao.update(capture.copy(status = CaptureStatus.ERROR, error = "Не е конфигуриран API ключ за Claude."))
+                dao.update(capture.copy(status = CaptureStatus.ERROR, error = context.getString(R.string.err_no_ai)))
                 return@withContext Result.success()
             }
 
             dao.update(capture.copy(status = CaptureStatus.ANALYZING, error = null))
-            val tasks = TaskExtractor(settings).extract(capture, text)
+            val tasks = TaskExtractor(context, settings).extract(capture, text)
 
             // Повторно обработване на един и същи източник не трябва да дублира редове.
             taskDao.byCapture(captureId).forEach { taskDao.delete(it) }
@@ -81,7 +82,7 @@ class ProcessCaptureWorker(
         } catch (e: Exception) {
             val message = e.message ?: e.javaClass.simpleName
             if (runAttemptCount < 3) {
-                dao.update(capture.copy(error = "Опит ${runAttemptCount + 1}: $message"))
+                dao.update(capture.copy(error = context.getString(R.string.err_attempt, runAttemptCount + 1, message)))
                 Result.retry()
             } else {
                 dao.update(capture.copy(status = CaptureStatus.ERROR, error = message))

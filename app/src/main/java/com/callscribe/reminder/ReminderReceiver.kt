@@ -57,7 +57,9 @@ class ReminderReceiver : BroadcastReceiver() {
     private fun subtitle(dueAt: Long?, contact: String?): String {
         val parts = mutableListOf<String>()
         contact?.let { parts.add(it) }
-        dueAt?.let { parts.add(SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("bg")).format(it)) }
+        dueAt?.let {
+            parts.add(SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(it))
+        }
         return parts.joinToString(" · ")
     }
 
@@ -75,8 +77,8 @@ class ReminderReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setContentIntent(open)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .addAction(0, "Готово", action(context, taskId, ACTION_DONE))
-            .addAction(0, "Отложи 1 час", action(context, taskId, ACTION_SNOOZE))
+            .addAction(0, context.getString(R.string.action_done), action(context, taskId, ACTION_DONE))
+            .addAction(0, context.getString(R.string.action_snooze), action(context, taskId, ACTION_SNOOZE))
             .build()
 
         try {

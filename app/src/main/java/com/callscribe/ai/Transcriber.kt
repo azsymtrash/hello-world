@@ -1,5 +1,7 @@
 package com.callscribe.ai
 
+import android.content.Context
+import com.callscribe.R
 import com.callscribe.data.Settings
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -12,12 +14,12 @@ import java.io.File
  * Транскрипция през OpenAI-съвместим endpoint `POST {base}/v1/audio/transcriptions`.
  * Работи с локален whisper.cpp сървър, faster-whisper-server, OpenAI и т.н.
  */
-class Transcriber(private val settings: Settings) {
+class Transcriber(private val context: Context, private val settings: Settings) {
 
     fun transcribe(file: File): String {
         val base = settings.asrBaseUrl
-        if (base.isBlank()) throw AiException("Не е конфигуриран сървър за транскрипция (Настройки → Транскрипция).")
-        if (!file.exists() || file.length() == 0L) throw AiException("Аудио файлът липсва или е празен.")
+        if (base.isBlank()) throw AiException(context.getString(R.string.err_no_asr))
+        if (!file.exists() || file.length() == 0L) throw AiException(context.getString(R.string.err_empty_audio))
 
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
@@ -37,7 +39,7 @@ class Transcriber(private val settings: Settings) {
         Http.client.newCall(builder.build()).execute().use { response ->
             val text = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
-                throw AiException("Транскрипция неуспешна (HTTP ${response.code}): ${text.take(300)}")
+                throw AiException(context.getString(R.string.err_transcribe, response.code, text.take(300)))
             }
             return try {
                 JSONObject(text).optString("text").trim()

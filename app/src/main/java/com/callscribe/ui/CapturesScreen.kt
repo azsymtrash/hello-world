@@ -31,10 +31,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.callscribe.R
 import com.callscribe.data.Capture
+import com.callscribe.R
 import com.callscribe.data.CaptureStatus
+import com.callscribe.data.Kind
 import java.io.File
 
 @Composable
@@ -61,22 +65,21 @@ fun CapturesScreen(model: MainViewModel) {
     Column(Modifier.fillMaxSize().padding(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(onClick = { showText = true }, modifier = Modifier.weight(1f)) {
-                Text("Добави текст")
+                Text(stringResource(R.string.add_text))
             }
             OutlinedButton(
                 onClick = { audioLauncher.launch(arrayOf("audio/*")) },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("Качи аудио")
+                Text(stringResource(R.string.upload_audio))
             }
         }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = { model.syncNow() }, modifier = Modifier.fillMaxWidth()) {
-            Text("Провери за нови съобщения сега")
+            Text(stringResource(R.string.check_now))
         }
         Text(
-            "Новите съобщения се засичат сами на всеки 15 минути и при отваряне на " +
-                "приложението. Бутонът е само за да не чакаш.",
+            stringResource(R.string.auto_sync_note),
             style = MaterialTheme.typography.bodySmall
         )
 
@@ -84,8 +87,7 @@ fun CapturesScreen(model: MainViewModel) {
 
         if (captures.isEmpty()) {
             Text(
-                "Още няма записани източници. Разговорите се появяват тук автоматично, " +
-                    "ако записът е включен в настройките.",
+                stringResource(R.string.empty_no_sources),
                 style = MaterialTheme.typography.bodyMedium
             )
         } else {
@@ -102,19 +104,19 @@ fun CapturesScreen(model: MainViewModel) {
         var contact by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { showText = false },
-            title = { Text("Добави текст за анализ") },
+            title = { Text(stringResource(R.string.add_text_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = contact,
                         onValueChange = { contact = it },
-                        label = { Text("Контакт (по избор)") },
+                        label = { Text(stringResource(R.string.contact_optional)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = text,
                         onValueChange = { text = it },
-                        label = { Text("Съобщение или бележка от разговор") },
+                        label = { Text(stringResource(R.string.text_hint)) },
                         modifier = Modifier.fillMaxWidth().height(180.dp)
                     )
                 }
@@ -126,45 +128,68 @@ fun CapturesScreen(model: MainViewModel) {
                         showText = false
                     },
                     enabled = text.isNotBlank()
-                ) { Text("Анализирай") }
+                ) { Text(stringResource(R.string.analyze)) }
             },
-            dismissButton = { TextButton(onClick = { showText = false }) { Text("Отказ") } }
+            dismissButton = { TextButton(onClick = { showText = false }) { Text(stringResource(R.string.cancel)) } }
         )
     }
 
     detail?.let { capture ->
         AlertDialog(
             onDismissRequest = { detail = null },
-            title = { Text(Format.source(capture.kind) + " · " + Format.dateTime(capture.startedAt)) },
+            title = { Text(Format.source(context, capture.kind) + " · " + Format.dateTime(capture.startedAt)) },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    Text("Контакт: ${capture.contactName ?: capture.phone ?: "—"}")
-                    Text("Посока: ${Format.direction(capture.direction)}")
-                    if (capture.kind == com.callscribe.data.Kind.CALL) {
-                        Text("Времетраене: ${Format.duration(capture.durationSec)}")
+                    Text(
+                        stringResource(
+                            R.string.contact_line,
+                            capture.contactName ?: capture.phone ?: Format.EM_DASH
+                        )
+                    )
+                    Text(
+                        stringResource(
+                            R.string.direction_line,
+                            Format.direction(context, capture.direction)
+                        )
+                    )
+                    if (capture.kind == Kind.CALL) {
+                        Text(
+                            stringResource(
+                                R.string.duration_line,
+                                Format.duration(capture.durationSec)
+                            )
+                        )
                     }
-                    Text("Състояние: ${statusLabel(capture.status)}")
+                    Text(
+                        stringResource(
+                            R.string.state_line,
+                            Format.captureStatus(context, capture.status)
+                        )
+                    )
                     capture.error?.let {
-                        Text("Грешка: $it", color = MaterialTheme.colorScheme.error)
+                        Text(
+                            stringResource(R.string.error_line, it),
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
-                    Text("Текст:", fontWeight = FontWeight.SemiBold)
-                    Text(capture.text?.takeIf { it.isNotBlank() } ?: "— няма —")
+                    Text(stringResource(R.string.text_label), fontWeight = FontWeight.SemiBold)
+                    Text(capture.text?.takeIf { it.isNotBlank() } ?: stringResource(R.string.text_none))
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
                     model.reprocess(capture)
                     detail = null
-                }) { Text("Анализирай наново") }
+                }) { Text(stringResource(R.string.analyze_again)) }
             },
             dismissButton = {
                 Row {
                     TextButton(onClick = {
                         model.deleteCapture(capture)
                         detail = null
-                    }) { Text("Изтрий") }
-                    TextButton(onClick = { detail = null }) { Text("Затвори") }
+                    }) { Text(stringResource(R.string.delete)) }
+                    TextButton(onClick = { detail = null }) { Text(stringResource(R.string.close)) }
                 }
             }
         )
@@ -173,20 +198,31 @@ fun CapturesScreen(model: MainViewModel) {
 
 @Composable
 private fun CaptureCard(capture: Capture, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val who = capture.contactName ?: capture.phone ?: stringResource(R.string.unknown_contact)
+
     Card(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Column(Modifier.padding(12.dp)) {
             Text(
-                "${Format.source(capture.kind)} · ${capture.contactName ?: capture.phone ?: "неизвестен"}",
+                "${Format.source(context, capture.kind)} · $who",
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 Format.dateTime(capture.startedAt) +
-                    if (capture.kind == com.callscribe.data.Kind.CALL) " · ${Format.duration(capture.durationSec)}" else "",
+                    if (capture.kind == Kind.CALL) {
+                        " · ${Format.duration(capture.durationSec)}"
+                    } else {
+                        ""
+                    },
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                statusLabel(capture.status) +
-                    if (capture.status == CaptureStatus.DONE) " · ${capture.tasksFound} задачи" else "",
+                Format.captureStatus(context, capture.status) +
+                    if (capture.status == CaptureStatus.DONE) {
+                        " · " + stringResource(R.string.tasks_found, capture.tasksFound)
+                    } else {
+                        ""
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = if (capture.status == CaptureStatus.ERROR) {
                     MaterialTheme.colorScheme.error
@@ -199,12 +235,4 @@ private fun CaptureCard(capture: Capture, onClick: () -> Unit) {
             }
         }
     }
-}
-
-private fun statusLabel(status: String): String = when (status) {
-    CaptureStatus.NEW -> "Чака обработка"
-    CaptureStatus.TRANSCRIBING -> "Транскрибира се"
-    CaptureStatus.ANALYZING -> "Анализира се"
-    CaptureStatus.DONE -> "Готово"
-    else -> "Грешка"
 }

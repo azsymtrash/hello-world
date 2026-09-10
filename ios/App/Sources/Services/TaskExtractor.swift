@@ -27,7 +27,7 @@ struct TaskExtractor {
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let resolved = base.isEmpty ? "https://api.anthropic.com" : base
         guard let url = URL(string: "\(resolved)/v1/messages") else {
-            throw ServiceError(message: "Адресът на API-то е невалиден.")
+            throw ServiceError(message: String(localized: "The API address is invalid."))
         }
 
         var request = URLRequest(url: url)
@@ -53,21 +53,21 @@ struct TaskExtractor {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else {
-            throw ServiceError(message: "Няма отговор от модела.")
+            throw ServiceError(message: String(localized: "No response from the model."))
         }
         guard (200..<300).contains(http.statusCode) else {
             let detail = String(data: data, encoding: .utf8)?.prefix(300) ?? ""
-            throw ServiceError(message: "Анализът неуспешен (HTTP \(http.statusCode)): \(detail)")
+            throw ServiceError(message: String(format: String(localized: "Analysis failed (HTTP %d): %@"), http.statusCode, String(detail)))
         }
 
         guard let object = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let content = object["content"] as? [[String: Any]] else {
-            throw ServiceError(message: "Неочакван отговор от модела.")
+            throw ServiceError(message: String(localized: "Unexpected response from the model."))
         }
         guard let toolUse = content.first(where: { ($0["type"] as? String) == "tool_use" }),
               let input = toolUse["input"] as? [String: Any],
               let items = input["tasks"] as? [[String: Any]] else {
-            throw ServiceError(message: "Моделът не върна структуриран резултат.")
+            throw ServiceError(message: String(localized: "The model returned no structured result."))
         }
 
         return items.compactMap(Self.parse)

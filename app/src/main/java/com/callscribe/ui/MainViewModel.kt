@@ -3,6 +3,7 @@ package com.callscribe.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.callscribe.R
 import com.callscribe.data.AppDatabase
 import com.callscribe.data.Capture
 import com.callscribe.data.CaptureStatus
@@ -38,6 +39,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun clearMessage() {
         _message.value = null
     }
+
+    private fun string(resId: Int): String = getApplication<Application>().getString(resId)
 
     fun updateTask(task: TaskRow) = viewModelScope.launch(Dispatchers.IO) {
         val context = getApplication<Application>()
@@ -79,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         ProcessCaptureWorker.enqueue(getApplication(), id)
-        _message.value = "Текстът е добавен за анализ."
+        _message.value = string(R.string.msg_text_queued)
     }
 
     fun addAudioCapture(path: String, contact: String?) = viewModelScope.launch(Dispatchers.IO) {
@@ -92,13 +95,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             )
         )
         ProcessCaptureWorker.enqueue(getApplication(), id)
-        _message.value = "Записът е добавен за транскрипция."
+        _message.value = string(R.string.msg_audio_queued)
     }
 
     fun reprocess(capture: Capture) = viewModelScope.launch(Dispatchers.IO) {
         db.captureDao().update(capture.copy(status = CaptureStatus.NEW, error = null))
         ProcessCaptureWorker.enqueue(getApplication(), capture.id)
-        _message.value = "Обработката е пусната наново."
+        _message.value = string(R.string.msg_reprocessing)
     }
 
     fun deleteCapture(capture: Capture) = viewModelScope.launch(Dispatchers.IO) {
@@ -123,7 +126,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** Ръчно бутане на фоновото засичане; иначе то върви само на всеки 15 минути. */
     fun syncNow() {
         SmsSyncWorker.syncNow(getApplication())
-        _message.value = "Проверявам за нови съобщения…"
+        _message.value = string(R.string.msg_checking)
     }
 
     fun setAutoSync(enabled: Boolean) {

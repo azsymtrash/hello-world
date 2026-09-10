@@ -12,12 +12,12 @@ enum ReminderScheduler {
     static func registerCategories() {
         let done = UNNotificationAction(
             identifier: doneActionID,
-            title: "Готово",
+            title: String(localized: "Done"),
             options: [.authenticationRequired]
         )
         let snooze = UNNotificationAction(
             identifier: snoozeActionID,
-            title: "Отложи 1 час",
+            title: String(localized: "Snooze 1 hour"),
             options: []
         )
         let category = UNNotificationCategory(

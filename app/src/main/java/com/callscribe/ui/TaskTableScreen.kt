@@ -52,27 +52,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.annotation.StringRes
+import com.callscribe.R
 import com.callscribe.data.Priority
 import com.callscribe.data.TaskRow
 import com.callscribe.data.TaskStatus
 import com.callscribe.export.CsvExporter
 import java.util.Calendar
 
-private enum class SortKey(val label: String) {
-    CREATED("Създадено"),
-    SOURCE("Източник"),
-    CONTACT("Контакт"),
-    TITLE("Задача"),
-    DUE("Краен срок"),
-    PRIORITY("Приоритет"),
-    STATUS("Статус"),
-    CONFIDENCE("Увереност")
+private enum class SortKey(@StringRes val labelRes: Int) {
+    CREATED(R.string.column_created),
+    SOURCE(R.string.column_source),
+    CONTACT(R.string.column_contact),
+    TITLE(R.string.column_task),
+    DUE(R.string.column_due),
+    PRIORITY(R.string.column_priority),
+    STATUS(R.string.column_status),
+    CONFIDENCE(R.string.column_confidence)
 }
 
 /** Колоната с отметката „направено“ стои преди подредимите колони. */
@@ -108,7 +111,7 @@ fun TaskTableScreen(model: MainViewModel) {
         if (uri != null) {
             runCatching {
                 context.contentResolver.openOutputStream(uri)?.use { stream ->
-                    stream.write(CsvExporter.toCsv(tasks).toByteArray(Charsets.UTF_8))
+                    stream.write(CsvExporter.toCsv(context, tasks).toByteArray(Charsets.UTF_8))
                 }
             }
         }
@@ -131,11 +134,15 @@ fun TaskTableScreen(model: MainViewModel) {
                     onValueChange = { query = it },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    label = { Text("Търсене") },
+                    label = { Text(stringResource(R.string.search)) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) }
                 )
-                IconButton(onClick = { exportLauncher.launch("napomnyania.csv") }) {
-                    Icon(Icons.Filled.Download, contentDescription = "Експорт в CSV")
+                val csvName = stringResource(R.string.csv_file_name)
+                IconButton(onClick = { exportLauncher.launch(csvName) }) {
+                    Icon(
+                        Icons.Filled.Download,
+                        contentDescription = stringResource(R.string.export_csv)
+                    )
                 }
             }
 
@@ -149,20 +156,20 @@ fun TaskTableScreen(model: MainViewModel) {
                 FilterChip(
                     selected = statusFilter == TaskStatus.OPEN,
                     onClick = { statusFilter = TaskStatus.OPEN },
-                    label = { Text("Отворени") }
+                    label = { Text(stringResource(R.string.filter_open)) }
                 )
                 FilterChip(
                     selected = statusFilter == TaskStatus.DONE,
                     onClick = { statusFilter = TaskStatus.DONE },
-                    label = { Text("Готови") }
+                    label = { Text(stringResource(R.string.filter_done)) }
                 )
                 FilterChip(
                     selected = statusFilter == null,
                     onClick = { statusFilter = null },
-                    label = { Text("Всички") }
+                    label = { Text(stringResource(R.string.filter_all)) }
                 )
                 Text(
-                    "${visible.size} реда",
+                    stringResource(R.string.row_count, visible.size),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(top = 10.dp, start = 8.dp)
                 )
@@ -209,7 +216,7 @@ fun TaskTableScreen(model: MainViewModel) {
                 .align(Alignment.BottomEnd)
                 .padding(20.dp)
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Нова задача")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.new_task))
         }
     }
 
@@ -249,14 +256,15 @@ private fun EmptyState(noTasksAtAll: Boolean) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            if (noTasksAtAll) "Още няма извлечени задачи." else "Няма редове по този филтър.",
+            stringResource(
+                if (noTasksAtAll) R.string.empty_no_tasks else R.string.empty_no_matches
+            ),
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(Modifier.height(8.dp))
         if (noTasksAtAll) {
             Text(
-                "Задачите се появяват тук автоматично след разговор или съобщение. " +
-                    "Можеш да добавиш и текст ръчно от раздел „Източници“.",
+                stringResource(R.string.empty_hint),
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -277,7 +285,7 @@ private fun HeaderRow(
             .padding(vertical = 10.dp)
     ) {
         Text(
-            text = "Готово",
+            text = stringResource(R.string.column_done),
             modifier = Modifier.width(doneColumnWidth).padding(horizontal = 6.dp),
             fontWeight = FontWeight.SemiBold,
             fontSize = 11.sp,
@@ -287,7 +295,7 @@ private fun HeaderRow(
         SortKey.entries.forEach { key ->
             val arrow = if (key == sortKey) (if (ascending) " ▲" else " ▼") else ""
             Text(
-                text = key.label + arrow,
+                text = stringResource(key.labelRes) + arrow,
                 modifier = Modifier
                     .width(columnWidths.getValue(key))
                     .clickable { onSort(key) }
@@ -303,6 +311,7 @@ private fun HeaderRow(
 
 @Composable
 private fun TaskRowView(task: TaskRow, onToggleDone: () -> Unit, onClick: () -> Unit) {
+    val context = LocalContext.current
     val done = task.status == TaskStatus.DONE
     val overdue = task.dueAt != null &&
         task.dueAt < System.currentTimeMillis() &&
@@ -319,8 +328,12 @@ private fun TaskRowView(task: TaskRow, onToggleDone: () -> Unit, onClick: () -> 
             Checkbox(checked = done, onCheckedChange = { onToggleDone() })
         }
         Cell(Format.dateTime(task.createdAt), SortKey.CREATED, decoration = decoration)
-        Cell(Format.source(task.source), SortKey.SOURCE, decoration = decoration)
-        Cell(task.contactName ?: task.phone ?: "—", SortKey.CONTACT, decoration = decoration)
+        Cell(Format.source(context, task.source), SortKey.SOURCE, decoration = decoration)
+        Cell(
+            task.contactName ?: task.phone ?: Format.EM_DASH,
+            SortKey.CONTACT,
+            decoration = decoration
+        )
         Cell(task.title, SortKey.TITLE, maxLines = 2, decoration = decoration)
         Cell(
             Format.due(task.dueAt, task.allDay),
@@ -328,8 +341,8 @@ private fun TaskRowView(task: TaskRow, onToggleDone: () -> Unit, onClick: () -> 
             color = if (overdue) MaterialTheme.colorScheme.error else Color.Unspecified,
             decoration = decoration
         )
-        Cell(Format.priority(task.priority), SortKey.PRIORITY, decoration = decoration)
-        Cell(Format.status(task.status), SortKey.STATUS, decoration = decoration)
+        Cell(Format.priority(context, task.priority), SortKey.PRIORITY, decoration = decoration)
+        Cell(Format.status(context, task.status), SortKey.STATUS, decoration = decoration)
         Cell(Format.confidence(task.confidence), SortKey.CONFIDENCE, decoration = decoration)
     }
 }
@@ -404,7 +417,7 @@ private fun TaskDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Задача") },
+        title = { Text(stringResource(R.string.task)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -413,17 +426,23 @@ private fun TaskDialog(
                 OutlinedTextField(
                     value = draft.title,
                     onValueChange = { draft = draft.copy(title = it) },
-                    label = { Text("Задача") },
+                    label = { Text(stringResource(R.string.task)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = draft.contactName.orEmpty(),
                     onValueChange = { draft = draft.copy(contactName = it) },
-                    label = { Text("Контакт") },
+                    label = { Text(stringResource(R.string.contact)) },
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text("Източник: ${Format.source(draft.source)} · ${Format.dateTime(draft.createdAt)}",
-                    style = MaterialTheme.typography.bodySmall)
+                Text(
+                    stringResource(
+                        R.string.task_origin,
+                        Format.source(context, draft.source),
+                        Format.dateTime(draft.createdAt)
+                    ),
+                    style = MaterialTheme.typography.bodySmall
+                )
 
                 Button(
                     onClick = {
@@ -433,52 +452,52 @@ private fun TaskDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (draft.status == TaskStatus.DONE) "Върни като отворена" else "Направено")
+                    Text(stringResource(if (draft.status == TaskStatus.DONE) R.string.mark_open else R.string.mark_done))
                 }
 
                 TextButton(onClick = {
                     pickDateTime(context, draft.dueAt) { draft = draft.copy(dueAt = it, allDay = false) }
                 }) {
-                    Text("Краен срок: " + Format.due(draft.dueAt, draft.allDay))
+                    Text(stringResource(R.string.due_label, Format.due(draft.dueAt, draft.allDay)))
                 }
                 if (draft.dueAt != null) {
                     TextButton(onClick = { draft = draft.copy(dueAt = null) }) {
-                        Text("Премахни срока")
+                        Text(stringResource(R.string.clear_due))
                     }
                 }
 
                 Selector(
-                    label = "Приоритет",
-                    current = Format.priority(draft.priority),
+                    label = stringResource(R.string.priority),
+                    current = Format.priority(context, draft.priority),
                     options = listOf(Priority.HIGH, Priority.NORMAL, Priority.LOW),
-                    render = { Format.priority(it) },
+                    render = { Format.priority(context, it) },
                     onSelect = { draft = draft.copy(priority = it) }
                 )
                 Selector(
-                    label = "Статус",
-                    current = Format.status(draft.status),
+                    label = stringResource(R.string.status),
+                    current = Format.status(context, draft.status),
                     options = listOf(TaskStatus.OPEN, TaskStatus.DONE, TaskStatus.CANCELLED),
-                    render = { Format.status(it) },
+                    render = { Format.status(context, it) },
                     onSelect = { draft = draft.copy(status = it) }
                 )
 
                 draft.details?.takeIf { it.isNotBlank() }?.let {
-                    Text("Детайли: $it", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.details_label, it), style = MaterialTheme.typography.bodySmall)
                 }
                 draft.quote?.takeIf { it.isNotBlank() }?.let {
-                    Text("Цитат: „$it“", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.quote_label, it), style = MaterialTheme.typography.bodySmall)
                 }
                 Text(
-                    "Увереност на модела: ${Format.confidence(draft.confidence)}",
+                    stringResource(R.string.model_confidence, Format.confidence(draft.confidence)),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
         },
-        confirmButton = { TextButton(onClick = { onSave(draft) }) { Text("Запази") } },
+        confirmButton = { TextButton(onClick = { onSave(draft) }) { Text(stringResource(R.string.save)) } },
         dismissButton = {
             Row {
-                TextButton(onClick = onDelete) { Text("Изтрий") }
-                TextButton(onClick = onDismiss) { Text("Отказ") }
+                TextButton(onClick = onDelete) { Text(stringResource(R.string.delete)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
             }
         }
     )
@@ -521,24 +540,24 @@ private fun AddTaskDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Нова задача") },
+        title = { Text(stringResource(R.string.new_task)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Какво трябва да се направи") },
+                    label = { Text(stringResource(R.string.task_hint)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = contact,
                     onValueChange = { contact = it },
-                    label = { Text("Контакт (по избор)") },
+                    label = { Text(stringResource(R.string.contact_optional)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
                 TextButton(onClick = { pickDateTime(context, dueAt) { dueAt = it } }) {
-                    Text("Краен срок: " + Format.due(dueAt, false))
+                    Text(stringResource(R.string.due_label, Format.due(dueAt, false)))
                 }
             }
         },
@@ -546,9 +565,9 @@ private fun AddTaskDialog(
             TextButton(
                 onClick = { onAdd(title.trim(), contact.trim().ifBlank { null }, dueAt) },
                 enabled = title.isNotBlank()
-            ) { Text("Добави") }
+            ) { Text(stringResource(R.string.add)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Отказ") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
     )
 }
 

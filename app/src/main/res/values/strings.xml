@@ -1,6 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CallScribe</string>
-    <string name="accessibility_label">CallScribe — следене на разговори</string>
-    <string name="accessibility_description">Позволява на CallScribe да засича начало и край на телефонен разговор, за да стартира записа. Не чете съдържание на екрана.</string>
+    <string name="accessibility_label">CallScribe — call watcher</string>
+    <string name="accessibility_description">Lets CallScribe detect when a phone call starts and ends so it can start recording. It does not read screen content.</string>
+
+    <!-- Navigation -->
+    <string name="tab_table">Table</string>
+    <string name="tab_sources">Sources</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Consent -->
+    <string name="consent_intro">The app records phone calls and reads messages, turns them into text, and pulls out tasks with deadlines into a table of reminders.</string>
+    <string name="consent_heading">Read this before you continue:</string>
+    <string name="consent_legal">Recording a call without the other party knowing is illegal in many countries. Responsibility is yours.</string>
+    <string name="consent_audio">Since Android 10 the system gives no access to the other party\'s audio. On most phones the recording goes through the microphone — the other side is only audible on speakerphone.</string>
+    <string name="consent_network">Transcription and analysis are sent to the server you configure. The content of your calls leaves the phone. If that is not acceptable, use a local transcription server.</string>
+    <string name="consent_storage">Recordings and text stay on this phone only, in the app\'s private storage.</string>
+    <string name="consent_store">The app cannot be published on Google Play — the rules forbid call recording and SMS access for apps that are not the default SMS handler.</string>
+    <string name="consent_checkbox">I understand the requirements and take responsibility for lawful use.</string>
+    <string name="consent_continue">Understood, continue</string>
+
+    <!-- Table -->
+    <string name="table_title">Reminders</string>
+    <string name="search">Search</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="csv_file_name">reminders.csv</string>
+    <string name="filter_open">Open</string>
+    <string name="filter_done">Done</string>
+    <string name="filter_all">All</string>
+    <string name="row_count">%1$d rows</string>
+    <string name="new_task">New task</string>
+    <string name="empty_no_tasks">No tasks pulled out yet.</string>
+    <string name="empty_no_matches">Nothing matches this filter.</string>
+    <string name="empty_hint">Tasks appear here on their own after a call or a message. You can also add text by hand from “Sources”.</string>
+
+    <!-- Columns -->
+    <string name="column_done">Done</string>
+    <string name="column_created">Created</string>
+    <string name="column_source">Source</string>
+    <string name="column_contact">Contact</string>
+    <string name="column_task">Task</string>
+    <string name="column_due">Due</string>
+    <string name="column_priority">Priority</string>
+    <string name="column_status">Status</string>
+    <string name="column_confidence">Confidence</string>
+
+    <!-- Task dialog -->
+    <string name="task">Task</string>
+    <string name="contact">Contact</string>
+    <string name="task_origin">Source: %1$s · %2$s</string>
+    <string name="mark_done">Done</string>
+    <string name="mark_open">Reopen</string>
+    <string name="due_label">Due: %1$s</string>
+    <string name="clear_due">Remove the deadline</string>
+    <string name="priority">Priority</string>
+    <string name="status">Status</string>
+    <string name="details_label">Details: %1$s</string>
+    <string name="quote_label">Quote: “%1$s”</string>
+    <string name="model_confidence">Model confidence: %1$s</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
+    <string name="task_hint">What needs to happen</string>
+    <string name="contact_optional">Contact (optional)</string>
+
+    <!-- Sources -->
+    <string name="add_text">Add text</string>
+    <string name="upload_audio">Upload audio</string>
+    <string name="check_now">Check for new messages now</string>
+    <string name="auto_sync_note">New messages are picked up on their own every 15 minutes and whenever the app opens. The button is only there so you don\'t have to wait.</string>
+    <string name="empty_no_sources">No sources recorded yet. Calls show up here on their own if recording is switched on in the settings.</string>
+    <string name="add_text_title">Add text for analysis</string>
+    <string name="text_hint">Message or note from a call</string>
+    <string name="analyze">Analyze</string>
+    <string name="analyze_again">Analyze again</string>
+    <string name="close">Close</string>
+    <string name="no_contact">no contact</string>
+    <string name="unknown_contact">unknown</string>
+    <string name="contact_line">Contact: %1$s</string>
+    <string name="direction_line">Direction: %1$s</string>
+    <string name="duration_line">Duration: %1$s</string>
+    <string name="state_line">State: %1$s</string>
+    <string name="error_line">Error: %1$s</string>
+    <string name="text_label">Text:</string>
+    <string name="text_none">— none —</string>
+    <string name="tasks_found">%1$d tasks</string>
+
+    <!-- Settings -->
+    <string name="section_capture">Capture</string>
+    <string name="section_reminders">Reminders</string>
+    <string name="section_analysis">Analysis (Claude)</string>
+    <string name="section_transcription">Transcription</string>
+    <string name="setting_record_calls">Record calls</string>
+    <string name="setting_force_speaker">Turn on the speakerphone while recording</string>
+    <string name="setting_speaker_note">Without the speakerphone the microphone usually catches only your own voice — Android gives no access to the other party\'s audio.</string>
+    <string name="setting_read_sms">Read incoming messages</string>
+    <string name="setting_auto_sync">Pick up new messages automatically</string>
+    <string name="setting_auto_sync_note">Checks every 15 minutes and whenever the app opens. Switched off, new messages only come in when you press the button under “Sources”.</string>
+    <string name="setting_delete_audio">Delete audio after transcription</string>
+    <string name="request_permissions">Request the permissions again</string>
+    <string name="accessibility_on">The call watcher service is on.</string>
+    <string name="accessibility_off">The call watcher service is off — automatic recording will not start reliably.</string>
+    <string name="open_accessibility">Accessibility settings</string>
+    <string name="allow_exact_alarms">Allow exact alarms</string>
+    <string name="ignore_battery">Turn off battery optimization</string>
+    <string name="reminder_offset_label">How many minutes before the deadline to remind</string>
+    <string name="api_address">API address</string>
+    <string name="server_address">Server address</string>
+    <string name="api_key">API key</string>
+    <string name="model">Model</string>
+    <string name="language_label">Language: %1$s</string>
+    <string name="language_note">The language covers both steps: it is passed to the transcription server and it decides which language the model writes the extracted tasks in.</string>
+    <string name="ai_note">The key is stored in the app\'s memory unencrypted. It is safer to point the address at your own proxy server and leave the key field empty. Models: claude-opus-5 (most accurate), claude-sonnet-5 (balanced), claude-haiku-4-5 (cheapest).</string>
+    <string name="asr_note">Expects an OpenAI-compatible endpoint POST {address}/v1/audio/transcriptions. Works with a whisper.cpp server on your local network if you don\'t want the audio leaving your home.</string>
+
+    <!-- Sources: kinds and states -->
+    <string name="kind_call">Call</string>
+    <string name="kind_sms">Message</string>
+    <string name="kind_manual">Manual</string>
+    <string name="direction_in">Incoming</string>
+    <string name="direction_out">Outgoing</string>
+    <string name="dash">—</string>
+    <string name="priority_high">High</string>
+    <string name="priority_normal">Normal</string>
+    <string name="priority_low">Low</string>
+    <string name="status_open">Open</string>
+    <string name="status_done">Done</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="capture_new">Waiting to be processed</string>
+    <string name="capture_transcribing">Transcribing</string>
+    <string name="capture_analyzing">Analyzing</string>
+    <string name="capture_done">Done</string>
+    <string name="capture_error">Error</string>
+
+    <!-- Notifications -->
+    <string name="channel_capture">Call recording</string>
+    <string name="channel_capture_desc">Shown while a recording is running.</string>
+    <string name="channel_reminders">Reminders</string>
+    <string name="channel_reminders_desc">Reminders for tasks from calls and messages.</string>
+    <string name="recording_title">Recording a call</string>
+    <string name="recording_text">CallScribe is recording the current call.</string>
+    <string name="action_done">Done</string>
+    <string name="action_snooze">Snooze 1 hour</string>
+
+    <!-- Messages and errors -->
+    <string name="msg_text_queued">Text added for analysis.</string>
+    <string name="msg_audio_queued">Recording added for transcription.</string>
+    <string name="msg_reprocessing">Processing started again.</string>
+    <string name="msg_checking">Checking for new messages…</string>
+    <string name="err_no_asr">No transcription server configured (Settings → Transcription).</string>
+    <string name="err_no_ai">No Claude API key configured.</string>
+    <string name="err_no_text">No text to analyze.</string>
+    <string name="err_empty_audio">The audio file is missing or empty.</string>
+    <string name="err_attempt">Attempt %1$d: %2$s</string>
+    <string name="err_transcribe">Transcription failed (HTTP %1$d): %2$s</string>
+    <string name="err_analyze">Analysis failed (HTTP %1$d): %2$s</string>
+    <string name="err_unexpected">Unexpected response from the model.</string>
+    <string name="err_no_structured">The model returned no structured result.</string>
+
+    <!-- CSV -->
+    <string name="csv_created">Created</string>
+    <string name="csv_source">Source</string>
+    <string name="csv_contact">Contact</string>
+    <string name="csv_phone">Phone</string>
+    <string name="csv_task">Task</string>
+    <string name="csv_details">Details</string>
+    <string name="csv_due">Due</string>
+    <string name="csv_all_day">All day</string>
+    <string name="csv_priority">Priority</string>
+    <string name="csv_category">Category</string>
+    <string name="csv_status">Status</string>
+    <string name="csv_confidence">Confidence</string>
+    <string name="csv_reminder">Reminder</string>
+    <string name="csv_quote">Quote</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
 </resources>

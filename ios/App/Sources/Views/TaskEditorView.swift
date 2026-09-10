@@ -28,7 +28,7 @@ struct TaskEditorView: View {
                         task.status = task.isDone ? TaskState.open : TaskState.done
                     } label: {
                         Label(
-                            task.isDone ? "Върни като отворена" : "Направено",
+                            task.isDone ? "Reopen" : "Done",
                             systemImage: task.isDone ? "arrow.uturn.backward" : "checkmark.circle.fill"
                         )
                         .frame(maxWidth: .infinity)
@@ -38,51 +38,51 @@ struct TaskEditorView: View {
                     .listRowBackground(Color.clear)
                 }
 
-                Section("Задача") {
-                    TextField("Какво трябва да се направи", text: $task.title, axis: .vertical)
-                    TextField("Контакт", text: Binding(
+                Section("Task") {
+                    TextField("What needs to happen", text: $task.title, axis: .vertical)
+                    TextField("Contact", text: Binding(
                         get: { task.contactName ?? "" },
                         set: { task.contactName = $0.isEmpty ? nil : $0 }
                     ))
                 }
 
-                Section("Краен срок") {
-                    Toggle("Има срок", isOn: $hasDueDate)
+                Section("Due") {
+                    Toggle("Has a deadline", isOn: $hasDueDate)
                     if hasDueDate {
-                        DatePicker("Кога", selection: $dueDate)
-                        Toggle("Цял ден", isOn: $task.allDay)
+                        DatePicker("When", selection: $dueDate)
+                        Toggle("All day", isOn: $task.allDay)
                     }
                 }
 
-                Section("Класификация") {
-                    Picker("Приоритет", selection: $task.priority) {
-                        Text("Висок").tag(Priority.high)
-                        Text("Нормален").tag(Priority.normal)
-                        Text("Нисък").tag(Priority.low)
+                Section("Classification") {
+                    Picker("Priority", selection: $task.priority) {
+                        Text("High").tag(Priority.high)
+                        Text("Normal").tag(Priority.normal)
+                        Text("Low").tag(Priority.low)
                     }
-                    Picker("Статус", selection: $task.status) {
-                        Text("Отворено").tag(TaskState.open)
-                        Text("Готово").tag(TaskState.done)
-                        Text("Отказано").tag(TaskState.cancelled)
+                    Picker("Status", selection: $task.status) {
+                        Text("Open").tag(TaskState.open)
+                        Text("Done").tag(TaskState.done)
+                        Text("Cancelled").tag(TaskState.cancelled)
                     }
                 }
 
-                Section("От източника") {
-                    LabeledContent("Тип", value: Formatting.source(task.source))
-                    LabeledContent("Създадено", value: Formatting.dateTime(task.createdAt))
-                    LabeledContent("Увереност", value: Formatting.confidence(task.confidence))
+                Section("From the source") {
+                    LabeledContent("Type", value: Formatting.source(task.source))
+                    LabeledContent("Created", value: Formatting.dateTime(task.createdAt))
+                    LabeledContent("Confidence", value: Formatting.confidence(task.confidence))
                     if let details = task.details, !details.isEmpty {
                         Text(details).font(.footnote)
                     }
                     if let quote = task.quote, !quote.isEmpty {
-                        Text("„\(quote)“")
+                        Text(verbatim: "“\(quote)”")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
                 }
 
                 Section {
-                    Button("Изтрий задачата", role: .destructive) {
+                    Button("Delete the task", role: .destructive) {
                         ReminderScheduler.cancel(taskID: task.id)
                         context.delete(task)
                         onSave()
@@ -90,14 +90,14 @@ struct TaskEditorView: View {
                     }
                 }
             }
-            .navigationTitle("Задача")
+            .navigationTitle("Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Затвори") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Запази") {
+                    Button("Save") {
                         task.dueAt = hasDueDate ? dueDate : nil
                         task.reminderAt = task.status == TaskState.open
                             ? ReminderScheduler.reminderTime(
@@ -129,25 +129,25 @@ struct NewTaskView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Задача") {
-                    TextField("Какво трябва да се направи", text: $title, axis: .vertical)
-                    TextField("Контакт (по избор)", text: $contact)
+                Section("Task") {
+                    TextField("What needs to happen", text: $title, axis: .vertical)
+                    TextField("Contact (optional)", text: $contact)
                 }
-                Section("Краен срок") {
-                    Toggle("Има срок", isOn: $hasDueDate)
+                Section("Due") {
+                    Toggle("Has a deadline", isOn: $hasDueDate)
                     if hasDueDate {
-                        DatePicker("Кога", selection: $dueDate)
+                        DatePicker("When", selection: $dueDate)
                     }
                 }
             }
-            .navigationTitle("Нова задача")
+            .navigationTitle("New task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отказ") { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Добави") {
+                    Button("Add") {
                         onAdd(
                             title.trimmingCharacters(in: .whitespacesAndNewlines),
                             contact.isEmpty ? nil : contact,

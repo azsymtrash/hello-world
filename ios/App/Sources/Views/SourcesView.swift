@@ -23,20 +23,20 @@ struct SourcesView: View {
                     Button {
                         showTextEntry = true
                     } label: {
-                        Label("Добави текст", systemImage: "text.badge.plus")
+                        Label("Add text", systemImage: "text.badge.plus")
                     }
 
                     Button {
                         pasteFromClipboard()
                     } label: {
-                        Label("Постави от клипборда", systemImage: "doc.on.clipboard")
+                        Label("Paste from the clipboard", systemImage: "doc.on.clipboard")
                     }
                 } footer: {
-                    Text("Анализът тръгва сам, щом добавиш източник. От Съобщения натисни и задръж съобщението → Сподели → CallScribe.")
+                    Text("Analysis starts on its own as soon as you add a source. In Messages, press and hold a message → Share → CallScribe.")
                 }
 
                 if !captures.isEmpty {
-                    Section("Източници") {
+                    Section("Sources") {
                         ForEach(captures) { capture in
                             captureRow(capture)
                                 .contentShape(Rectangle())
@@ -46,7 +46,7 @@ struct SourcesView: View {
                     }
                 }
             }
-            .navigationTitle("Източници")
+            .navigationTitle("Sources")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showTextEntry) {
                 TextEntryView { text, contact in
@@ -58,10 +58,10 @@ struct SourcesView: View {
                     Task { await CaptureProcessor(context: context).process(capture) }
                 }
             }
-            .alert("Няма достъп до микрофона", isPresented: $permissionDenied) {
-                Button("Добре", role: .cancel) {}
+            .alert("No access to the microphone", isPresented: $permissionDenied) {
+                Button("OK", role: .cancel) {}
             } message: {
-                Text("Разреши достъпа от Настройки → CallScribe → Микрофон.")
+                Text("Allow access from Settings → CallScribe → Microphone.")
             }
         }
     }
@@ -76,7 +76,7 @@ struct SourcesView: View {
         } label: {
             HStack {
                 Label(
-                    recorder.isRecording ? "Спри записа" : "Запиши среща",
+                    recorder.isRecording ? "Stop recording" : "Record a meeting",
                     systemImage: recorder.isRecording ? "stop.circle.fill" : "mic.circle.fill"
                 )
                 Spacer()
@@ -92,7 +92,7 @@ struct SourcesView: View {
 
     private func captureRow(_ capture: Capture) -> some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("\(Formatting.source(capture.kind)) · \(capture.contactName ?? "без контакт")")
+            Text(verbatim: "\(Formatting.source(capture.kind)) · \(capture.contactName ?? String(localized: "no contact"))")
                 .font(.subheadline.weight(.semibold))
             Text(Formatting.dateTime(capture.startedAt))
                 .font(.caption)
@@ -117,10 +117,10 @@ struct SourcesView: View {
 
     private func statusLine(_ capture: Capture) -> String {
         if capture.status == CaptureStatus.done {
-            return "Готово · \(capture.tasksFound) задачи"
+            return String(format: String(localized: "Done · %d tasks"), capture.tasksFound)
         }
         if capture.status == CaptureStatus.error {
-            return capture.errorMessage ?? "Грешка"
+            return capture.errorMessage ?? String(localized: "Error")
         }
         return Formatting.captureStatus(capture.status)
     }
@@ -195,22 +195,22 @@ struct TextEntryView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Контакт (по избор)") {
-                    TextField("Име", text: $contact)
+                Section("Contact (optional)") {
+                    TextField("Name", text: $contact)
                 }
-                Section("Текст") {
+                Section("Text") {
                     TextEditor(text: $text)
                         .frame(minHeight: 180)
                 }
             }
-            .navigationTitle("Добави текст")
+            .navigationTitle("Add text")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отказ") { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Анализирай") {
+                    Button("Analyze") {
                         onAdd(text.trimmingCharacters(in: .whitespacesAndNewlines),
                               contact.isEmpty ? nil : contact)
                         dismiss()
@@ -234,25 +234,25 @@ struct CaptureDetailView: View {
         NavigationStack {
             List {
                 Section {
-                    LabeledContent("Тип", value: Formatting.source(capture.kind))
-                    LabeledContent("Контакт", value: capture.contactName ?? "—")
-                    LabeledContent("Кога", value: Formatting.dateTime(capture.startedAt))
+                    LabeledContent("Type", value: Formatting.source(capture.kind))
+                    LabeledContent("Contact", value: capture.contactName ?? Formatting.emDash)
+                    LabeledContent("When", value: Formatting.dateTime(capture.startedAt))
                     if capture.kind == Kind.call {
-                        LabeledContent("Времетраене", value: Formatting.duration(capture.durationSec))
+                        LabeledContent("Duration", value: Formatting.duration(capture.durationSec))
                     }
-                    LabeledContent("Състояние", value: Formatting.captureStatus(capture.status))
+                    LabeledContent("State", value: Formatting.captureStatus(capture.status))
                     if let error = capture.errorMessage {
                         Text(error).font(.footnote).foregroundStyle(.red)
                     }
                 }
 
-                Section("Текст") {
-                    Text(capture.text?.isEmpty == false ? capture.text! : "— няма —")
+                Section("Text") {
+                    Text(capture.text?.isEmpty == false ? capture.text! : String(localized: "— none —"))
                         .font(.footnote)
                 }
 
                 Section {
-                    Button("Анализирай наново") {
+                    Button("Analyze again") {
                         capture.status = CaptureStatus.new
                         capture.errorMessage = nil
                         onReprocess()
@@ -260,11 +260,11 @@ struct CaptureDetailView: View {
                     }
                 }
             }
-            .navigationTitle("Източник")
+            .navigationTitle("Source")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Затвори") { dismiss() }
+                    Button("Close") { dismiss() }
                 }
             }
         }

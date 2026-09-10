@@ -14,15 +14,15 @@ struct RootView: View {
             if settings.consentAccepted {
                 TabView(selection: $selection) {
                     TaskTableView()
-                        .tabItem { Label("Таблица", systemImage: "tablecells") }
+                        .tabItem { Label("Table", systemImage: "tablecells") }
                         .tag(0)
 
                     SourcesView()
-                        .tabItem { Label("Източници", systemImage: "waveform") }
+                        .tabItem { Label("Sources", systemImage: "waveform") }
                         .tag(1)
 
                     SettingsView()
-                        .tabItem { Label("Настройки", systemImage: "gearshape") }
+                        .tabItem { Label("Settings", systemImage: "gearshape") }
                         .tag(2)
                 }
                 .task { await bootstrap() }

@@ -8,61 +8,67 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Анализирай автоматично", isOn: $settings.autoProcess)
-                    Toggle("Трий аудиото след транскрипция", isOn: $settings.deleteAudioAfterTranscript)
+                    Toggle("Analyze automatically", isOn: $settings.autoProcess)
+                    Toggle("Delete audio after transcription", isOn: $settings.deleteAudioAfterTranscript)
                     Stepper(
-                        "Напомняй \(settings.reminderOffsetMinutes) мин. преди срока",
                         value: $settings.reminderOffsetMinutes,
                         in: 0...1440,
                         step: 15
-                    )
+                    ) {
+                        Text(
+                            verbatim: String(
+                                format: String(localized: "Remind %d min before the deadline"),
+                                settings.reminderOffsetMinutes
+                            )
+                        )
+                    }
                 } header: {
-                    Text("Поведение")
+                    Text("Behavior")
                 } footer: {
-                    Text("Изключено, източниците стоят необработени, докато не натиснеш „Анализирай наново“.")
+                    Text("Switched off, sources stay unprocessed until you press “Analyze again”.")
                 }
 
                 Section {
-                    TextField("Адрес на API", text: $settings.aiBaseURL)
+                    TextField("API address", text: $settings.aiBaseURL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    SecureField("API ключ", text: $settings.aiAPIKey)
-                    TextField("Модел", text: $settings.aiModel)
+                    SecureField("API key", text: $settings.aiAPIKey)
+                    TextField("Model", text: $settings.aiModel)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
-                    Text("Анализ (Claude)")
+                    Text("Analysis (Claude)")
                 } footer: {
-                    Text("Ключът стои некриптиран в паметта на приложението. По-безопасно е адресът да сочи към собствен прокси сървър, а полето за ключ да остане празно. Модели: claude-opus-5 (най-точен), claude-sonnet-5 (баланс), claude-haiku-4-5 (най-евтин).")
+                    Text("The key sits unencrypted in the app's storage. It is safer to point the address at your own proxy server and leave the key field empty. Models: claude-opus-5 (most accurate), claude-sonnet-5 (balanced), claude-haiku-4-5 (cheapest).")
                 }
 
                 Section {
-                    TextField("Адрес на сървъра", text: $settings.asrBaseURL)
+                    TextField("Server address", text: $settings.asrBaseURL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    SecureField("API ключ", text: $settings.asrAPIKey)
-                    TextField("Модел", text: $settings.asrModel)
+                    SecureField("API key", text: $settings.asrAPIKey)
+                    TextField("Model", text: $settings.asrModel)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    Picker("Език", selection: $settings.language) {
+                    Picker("Language", selection: $settings.language) {
                         ForEach(Languages.all) { option in
                             Text(option.label).tag(option.code)
                         }
                     }
                 } header: {
-                    Text("Транскрипция")
+                    Text("Transcription")
                 } footer: {
-                    Text("Езикът важи и за двете стъпки: подава се на сървъра за транскрипция и определя на какъв език моделът пише извлечените задачи. Очаква се OpenAI-съвместим endpoint POST {адрес}/v1/audio/transcriptions — работи и с whisper.cpp сървър в локалната мрежа, ако не искаш аудиото да напуска дома ти.")
+                    Text("The language covers both steps: it is passed to the transcription server and it decides which language the model writes the extracted tasks in. Expects an OpenAI-compatible endpoint POST {address}/v1/audio/transcriptions — works with a whisper.cpp server on your local network if you don't want the audio leaving your home.")
                 }
 
                 Section {
-                    LabeledContent("Анализ", value: settings.aiConfigured ? "готов" : "не е настроен")
-                    LabeledContent("Транскрипция", value: settings.asrConfigured ? "готова" : "не е настроена")
+                    LabeledContent("Analysis", value: settings.aiConfigured ? String(localized: "ready") : String(localized: "not configured"))
+                    LabeledContent("Transcription", value: settings.asrConfigured ? String(localized: "ready") : String(localized: "not configured"))
                 } header: {
-                    Text("Състояние")
+                    Text("State")
                 }
             }
-            .navigationTitle("Настройки")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
         }
     }

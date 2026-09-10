@@ -14,11 +14,11 @@ struct Transcriber {
         let base = settings.asrBaseURL.trimmingCharacters(in: .whitespaces)
             .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         guard !base.isEmpty, let url = URL(string: "\(base)/v1/audio/transcriptions") else {
-            throw ServiceError(message: "Не е конфигуриран сървър за транскрипция (Настройки → Транскрипция).")
+            throw ServiceError(message: String(localized: "No transcription server configured (Settings → Transcription)."))
         }
         let audio = try Data(contentsOf: fileURL)
         guard !audio.isEmpty else {
-            throw ServiceError(message: "Аудио файлът е празен.")
+            throw ServiceError(message: String(localized: "The audio file is empty."))
         }
 
         let boundary = "callscribe-\(UUID().uuidString)"
@@ -54,11 +54,11 @@ struct Transcriber {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else {
-            throw ServiceError(message: "Няма отговор от сървъра за транскрипция.")
+            throw ServiceError(message: String(localized: "No response from the transcription server."))
         }
         guard (200..<300).contains(http.statusCode) else {
             let detail = String(data: data, encoding: .utf8)?.prefix(300) ?? ""
-            throw ServiceError(message: "Транскрипция неуспешна (HTTP \(http.statusCode)): \(detail)")
+            throw ServiceError(message: String(format: String(localized: "Transcription failed (HTTP %d): %@"), http.statusCode, String(detail)))
         }
 
         if let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],

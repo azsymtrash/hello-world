@@ -45,7 +45,7 @@ final class AudioRecorder: NSObject {
             let recorder = try AVAudioRecorder(url: url, settings: settings)
             recorder.delegate = self
             guard recorder.record() else {
-                lastError = "Записът не можа да започне."
+                lastError = String(localized: "The recording could not start.")
                 return
             }
 
@@ -77,7 +77,7 @@ final class AudioRecorder: NSObject {
         let size = (attributes?[.size] as? NSNumber)?.intValue ?? 0
         guard size > 4096 else {
             try? FileManager.default.removeItem(at: url)
-            lastError = "Записът е твърде кратък."
+            lastError = String(localized: "The recording is too short.")
             return nil
         }
         return (name, max(duration, 1))
@@ -98,7 +98,7 @@ final class AudioRecorder: NSObject {
 
 extension AudioRecorder: AVAudioRecorderDelegate {
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-        lastError = error?.localizedDescription ?? "Грешка при кодиране на записа."
+        lastError = error?.localizedDescription ?? String(localized: "The recording failed to encode.")
         isRecording = false
         stopTimer()
     }
