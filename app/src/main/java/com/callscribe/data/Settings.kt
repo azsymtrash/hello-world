@@ -29,6 +29,16 @@ class Settings(context: Context) {
         get() = prefs.getBoolean(K_READ_SMS, false)
         set(v) = prefs.edit().putBoolean(K_READ_SMS, v).apply()
 
+    /** Автоматично засичане на нови съобщения на фон, без натискане на бутон. */
+    var autoSync: Boolean
+        get() = prefs.getBoolean(K_AUTO_SYNC, true)
+        set(v) = prefs.edit().putBoolean(K_AUTO_SYNC, v).apply()
+
+    /** Докъде е стигнало последното сканиране на съобщенията. */
+    var lastSmsImportAt: Long
+        get() = prefs.getLong(K_LAST_SMS_IMPORT, 0L)
+        set(v) = prefs.edit().putLong(K_LAST_SMS_IMPORT, v).apply()
+
     var deleteAudioAfterTranscript: Boolean
         get() = prefs.getBoolean(K_DELETE_AUDIO, false)
         set(v) = prefs.edit().putBoolean(K_DELETE_AUDIO, v).apply()
@@ -77,6 +87,8 @@ class Settings(context: Context) {
         const val K_FORCE_SPEAKER = "force_speaker"
         const val K_READ_SMS = "read_sms"
         const val K_DELETE_AUDIO = "delete_audio"
+        const val K_AUTO_SYNC = "auto_sync"
+        const val K_LAST_SMS_IMPORT = "last_sms_import"
         const val K_REMINDER_OFFSET = "reminder_offset"
         const val K_AI_BASE = "ai_base"
         const val K_AI_KEY = "ai_key"

@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,6 +74,9 @@ private enum class SortKey(val label: String) {
     STATUS("Статус"),
     CONFIDENCE("Увереност")
 }
+
+/** Колоната с отметката „направено“ стои преди подредимите колони. */
+private val doneColumnWidth = 52.dp
 
 private val columnWidths = mapOf(
     SortKey.CREATED to 108.dp,
@@ -168,7 +174,7 @@ fun TaskTableScreen(model: MainViewModel) {
                 EmptyState(tasks.isEmpty())
             } else {
                 val horizontal = rememberScrollState()
-                val tableWidth = columnWidths.values.fold(0.dp) { acc, dp -> acc + dp }
+                val tableWidth = columnWidths.values.fold(doneColumnWidth) { acc, dp -> acc + dp }
 
                 Column(Modifier.horizontalScroll(horizontal)) {
                     HeaderRow(
@@ -185,7 +191,11 @@ fun TaskTableScreen(model: MainViewModel) {
                     HorizontalDivider()
                     LazyColumn(Modifier.width(tableWidth)) {
                         items(visible, key = { it.id }) { task ->
-                            TaskRowView(task) { selected = task }
+                            TaskRowView(
+                                task = task,
+                                onToggleDone = { model.toggleDone(task) },
+                                onClick = { selected = task }
+                            )
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
@@ -266,6 +276,14 @@ private fun HeaderRow(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(vertical = 10.dp)
     ) {
+        Text(
+            text = "Готово",
+            modifier = Modifier.width(doneColumnWidth).padding(horizontal = 6.dp),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 11.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         SortKey.entries.forEach { key ->
             val arrow = if (key == sortKey) (if (ascending) " ▲" else " ▼") else ""
             Text(
@@ -284,28 +302,35 @@ private fun HeaderRow(
 }
 
 @Composable
-private fun TaskRowView(task: TaskRow, onClick: () -> Unit) {
+private fun TaskRowView(task: TaskRow, onToggleDone: () -> Unit, onClick: () -> Unit) {
+    val done = task.status == TaskStatus.DONE
     val overdue = task.dueAt != null &&
         task.dueAt < System.currentTimeMillis() &&
         task.status == TaskStatus.OPEN
+    val decoration = if (done) TextDecoration.LineThrough else TextDecoration.None
 
     Row(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp)
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Cell(Format.dateTime(task.createdAt), SortKey.CREATED)
-        Cell(Format.source(task.source), SortKey.SOURCE)
-        Cell(task.contactName ?: task.phone ?: "—", SortKey.CONTACT)
-        Cell(task.title, SortKey.TITLE, maxLines = 2)
+        Box(Modifier.width(doneColumnWidth)) {
+            Checkbox(checked = done, onCheckedChange = { onToggleDone() })
+        }
+        Cell(Format.dateTime(task.createdAt), SortKey.CREATED, decoration = decoration)
+        Cell(Format.source(task.source), SortKey.SOURCE, decoration = decoration)
+        Cell(task.contactName ?: task.phone ?: "—", SortKey.CONTACT, decoration = decoration)
+        Cell(task.title, SortKey.TITLE, maxLines = 2, decoration = decoration)
         Cell(
             Format.due(task.dueAt, task.allDay),
             SortKey.DUE,
-            color = if (overdue) MaterialTheme.colorScheme.error else Color.Unspecified
+            color = if (overdue) MaterialTheme.colorScheme.error else Color.Unspecified,
+            decoration = decoration
         )
-        Cell(Format.priority(task.priority), SortKey.PRIORITY)
-        Cell(Format.status(task.status), SortKey.STATUS)
-        Cell(Format.confidence(task.confidence), SortKey.CONFIDENCE)
+        Cell(Format.priority(task.priority), SortKey.PRIORITY, decoration = decoration)
+        Cell(Format.status(task.status), SortKey.STATUS, decoration = decoration)
+        Cell(Format.confidence(task.confidence), SortKey.CONFIDENCE, decoration = decoration)
     }
 }
 
@@ -314,7 +339,8 @@ private fun Cell(
     text: String,
     key: SortKey,
     maxLines: Int = 1,
-    color: Color = Color.Unspecified
+    color: Color = Color.Unspecified,
+    decoration: TextDecoration = TextDecoration.None
 ) {
     Text(
         text = text,
@@ -323,6 +349,7 @@ private fun Cell(
             .padding(horizontal = 8.dp),
         fontSize = 13.sp,
         color = color,
+        textDecoration = decoration,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis
     )
@@ -397,6 +424,17 @@ private fun TaskDialog(
                 )
                 Text("Източник: ${Format.source(draft.source)} · ${Format.dateTime(draft.createdAt)}",
                     style = MaterialTheme.typography.bodySmall)
+
+                Button(
+                    onClick = {
+                        draft = draft.copy(
+                            status = if (draft.status == TaskStatus.DONE) TaskStatus.OPEN else TaskStatus.DONE
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (draft.status == TaskStatus.DONE) "Върни като отворена" else "Направено")
+                }
 
                 TextButton(onClick = {
                     pickDateTime(context, draft.dueAt) { draft = draft.copy(dueAt = it, allDay = false) }

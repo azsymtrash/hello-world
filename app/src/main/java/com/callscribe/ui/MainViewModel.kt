@@ -3,15 +3,16 @@ package com.callscribe.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.callscribe.capture.SmsImporter
 import com.callscribe.data.AppDatabase
 import com.callscribe.data.Capture
 import com.callscribe.data.CaptureStatus
 import com.callscribe.data.Kind
 import com.callscribe.data.Settings
 import com.callscribe.data.TaskRow
+import com.callscribe.data.TaskStatus
 import com.callscribe.reminder.ReminderScheduler
 import com.callscribe.work.ProcessCaptureWorker
+import com.callscribe.work.SmsSyncWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,7 +43,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val context = getApplication<Application>()
         ReminderScheduler.cancel(context, task.id)
         val reminderAt = ReminderScheduler.reminderTimeFor(task, settings.reminderOffsetMinutes)
-            .takeIf { task.status == com.callscribe.data.TaskStatus.OPEN }
+            .takeIf { task.status == TaskStatus.OPEN }
         val updated = task.copy(reminderAt = reminderAt)
         db.taskDao().update(updated)
         if (reminderAt != null) ReminderScheduler.schedule(context, updated)
@@ -109,10 +110,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         db.captureDao().delete(capture)
     }
 
-    fun importSms(days: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val since = System.currentTimeMillis() - days * 24L * 60 * 60 * 1000
-        val count = runCatching { SmsImporter.importSince(getApplication(), since) }.getOrDefault(0)
-        _message.value = if (count > 0) "Внесени $count съобщения." else "Няма нови съобщения за внасяне."
+    /** Отмята задачата като направена — или я връща обратно на отворена. */
+    fun toggleDone(task: TaskRow) {
+        val next = if (task.status == TaskStatus.DONE) TaskStatus.OPEN else TaskStatus.DONE
+        updateTask(task.copy(status = next))
+    }
+
+    fun markDone(task: TaskRow) {
+        if (task.status != TaskStatus.DONE) updateTask(task.copy(status = TaskStatus.DONE))
+    }
+
+    /** Ръчно бутане на фоновото засичане; иначе то върви само на всеки 15 минути. */
+    fun syncNow() {
+        SmsSyncWorker.syncNow(getApplication())
+        _message.value = "Проверявам за нови съобщения…"
+    }
+
+    fun setAutoSync(enabled: Boolean) {
+        settings.autoSync = enabled
+        if (enabled) {
+            SmsSyncWorker.schedulePeriodic(getApplication())
+            SmsSyncWorker.syncNow(getApplication())
+        } else {
+            SmsSyncWorker.cancelPeriodic(getApplication())
+        }
     }
 
     fun rescheduleAll() = viewModelScope.launch(Dispatchers.IO) {

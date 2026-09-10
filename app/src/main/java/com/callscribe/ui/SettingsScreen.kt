@@ -43,6 +43,7 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
     var recordCalls by remember { mutableStateOf(settings.recordCalls) }
     var forceSpeaker by remember { mutableStateOf(settings.forceSpeaker) }
     var readSms by remember { mutableStateOf(settings.readSms) }
+    var autoSync by remember { mutableStateOf(settings.autoSync) }
     var deleteAudio by remember { mutableStateOf(settings.deleteAudioAfterTranscript) }
     var offset by remember { mutableStateOf(settings.reminderOffsetMinutes.toString()) }
 
@@ -81,6 +82,15 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
             readSms = it
             settings.readSms = it
         }
+        Toggle("Засичай новите съобщения автоматично", autoSync) {
+            autoSync = it
+            model.setAutoSync(it)
+        }
+        Text(
+            "Проверява на всеки 15 минути и при отваряне на приложението. Изключено, " +
+                "новите съобщения влизат само когато натиснеш бутона в „Източници“.",
+            style = MaterialTheme.typography.bodySmall
+        )
         Toggle("Трий аудиото след транскрипция", deleteAudio) {
             deleteAudio = it
             settings.deleteAudioAfterTranscript = it

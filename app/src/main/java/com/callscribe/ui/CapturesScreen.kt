@@ -71,14 +71,14 @@ fun CapturesScreen(model: MainViewModel) {
             }
         }
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedButton(onClick = { model.importSms(7) }, modifier = Modifier.weight(1f)) {
-                Text("Внеси SMS (7 дни)")
-            }
-            OutlinedButton(onClick = { model.importSms(30) }, modifier = Modifier.weight(1f)) {
-                Text("Внеси SMS (30 дни)")
-            }
+        OutlinedButton(onClick = { model.syncNow() }, modifier = Modifier.fillMaxWidth()) {
+            Text("Провери за нови съобщения сега")
         }
+        Text(
+            "Новите съобщения се засичат сами на всеки 15 минути и при отваряне на " +
+                "приложението. Бутонът е само за да не чакаш.",
+            style = MaterialTheme.typography.bodySmall
+        )
 
         Spacer(Modifier.height(12.dp))
 
