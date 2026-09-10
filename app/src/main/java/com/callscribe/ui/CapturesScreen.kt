@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.callscribe.R
 import com.callscribe.data.Capture
-import com.callscribe.R
 import com.callscribe.data.CaptureStatus
 import com.callscribe.data.Kind
 import java.io.File

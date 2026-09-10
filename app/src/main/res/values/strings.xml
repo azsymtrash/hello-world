@@ -21,7 +21,6 @@
     <string name="consent_continue">Understood, continue</string>
 
     <!-- Table -->
-    <string name="table_title">Reminders</string>
     <string name="search">Search</string>
     <string name="export_csv">Export to CSV</string>
     <string name="csv_file_name">reminders.csv</string>
@@ -76,7 +75,6 @@
     <string name="analyze">Analyze</string>
     <string name="analyze_again">Analyze again</string>
     <string name="close">Close</string>
-    <string name="no_contact">no contact</string>
     <string name="unknown_contact">unknown</string>
     <string name="contact_line">Contact: %1$s</string>
     <string name="direction_line">Direction: %1$s</string>
@@ -121,7 +119,6 @@
     <string name="kind_manual">Manual</string>
     <string name="direction_in">Incoming</string>
     <string name="direction_out">Outgoing</string>
-    <string name="dash">—</string>
     <string name="priority_high">High</string>
     <string name="priority_normal">Normal</string>
     <string name="priority_low">Low</string>

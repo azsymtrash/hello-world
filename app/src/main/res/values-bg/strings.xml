@@ -17,7 +17,6 @@
     <string name="consent_checkbox">Разбирам изискванията и поемам отговорност за законосъобразната употреба.</string>
     <string name="consent_continue">Разбрах, продължи</string>
 
-    <string name="table_title">Напомняния</string>
     <string name="search">Търсене</string>
     <string name="export_csv">Експорт в CSV</string>
     <string name="csv_file_name">napomnyania.csv</string>
@@ -69,7 +68,6 @@
     <string name="analyze">Анализирай</string>
     <string name="analyze_again">Анализирай наново</string>
     <string name="close">Затвори</string>
-    <string name="no_contact">без контакт</string>
     <string name="unknown_contact">неизвестен</string>
     <string name="contact_line">Контакт: %1$s</string>
     <string name="direction_line">Посока: %1$s</string>
