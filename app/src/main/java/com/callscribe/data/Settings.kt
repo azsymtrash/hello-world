@@ -74,9 +74,10 @@ class Settings(context: Context) {
         get() = prefs.getString(K_ASR_MODEL, "whisper-1") ?: ""
         set(v) = prefs.edit().putString(K_ASR_MODEL, v.trim()).apply()
 
+    /** Код на езика ("bg", "en") — виж [Languages]. */
     var language: String
-        get() = prefs.getString(K_LANG, "bg") ?: "bg"
-        set(v) = prefs.edit().putString(K_LANG, v.trim()).apply()
+        get() = Languages.normalize(prefs.getString(K_LANG, Languages.DEFAULT) ?: Languages.DEFAULT)
+        set(v) = prefs.edit().putString(K_LANG, Languages.normalize(v.trim())).apply()
 
     val aiConfigured: Boolean get() = aiBaseUrl.isNotBlank() && (aiApiKey.isNotBlank() || !aiBaseUrl.contains("api.anthropic.com"))
     val asrConfigured: Boolean get() = asrBaseUrl.isNotBlank()

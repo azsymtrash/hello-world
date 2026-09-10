@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings as AndroidSettings
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -34,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.callscribe.capture.CallWatchAccessibilityService
+import com.callscribe.data.Languages
 
 @Composable
 fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
@@ -164,7 +168,15 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
         Field("Адрес на сървъра", asrBase, { asrBase = it; settings.asrBaseUrl = it })
         Field("API ключ", asrKey, { asrKey = it; settings.asrApiKey = it }, secret = true)
         Field("Модел", asrModel, { asrModel = it; settings.asrModel = it })
-        Field("Език", language, { language = it; settings.language = it })
+        LanguageSelector(current = language) {
+            language = it
+            settings.language = it
+        }
+        Text(
+            "Езикът важи и за двете стъпки: подава се на сървъра за транскрипция и определя " +
+                "на какъв език моделът пише извлечените задачи.",
+            style = MaterialTheme.typography.bodySmall
+        )
         Text(
             "Очаква се OpenAI-съвместим endpoint POST {адрес}/v1/audio/transcriptions. " +
                 "Работи с whisper.cpp сървър в локалната мрежа, ако не искаш аудиото да напуска дома ти.",
@@ -172,6 +184,28 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
         )
 
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun LanguageSelector(current: String, onSelect: (String) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+            Text("Език: ${Languages.label(current)}")
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            Languages.all.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.label) },
+                    onClick = {
+                        onSelect(option.code)
+                        expanded = false
+                    }
+                )
+            }
+        }
     }
 }
 

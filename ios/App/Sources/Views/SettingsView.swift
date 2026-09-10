@@ -44,13 +44,15 @@ struct SettingsView: View {
                     TextField("Модел", text: $settings.asrModel)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    TextField("Език", text: $settings.language)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                    Picker("Език", selection: $settings.language) {
+                        ForEach(Languages.all) { option in
+                            Text(option.label).tag(option.code)
+                        }
+                    }
                 } header: {
                     Text("Транскрипция")
                 } footer: {
-                    Text("Очаква се OpenAI-съвместим endpoint POST {адрес}/v1/audio/transcriptions. Работи и с whisper.cpp сървър в локалната мрежа, ако не искаш аудиото да напуска дома ти.")
+                    Text("Езикът важи и за двете стъпки: подава се на сървъра за транскрипция и определя на какъв език моделът пише извлечените задачи. Очаква се OpenAI-съвместим endpoint POST {адрес}/v1/audio/transcriptions — работи и с whisper.cpp сървър в локалната мрежа, ако не искаш аудиото да напуска дома ти.")
                 }
 
                 Section {

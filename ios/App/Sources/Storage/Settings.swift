@@ -53,8 +53,16 @@ final class Settings {
         didSet { defaults.set(asrModel, forKey: Key.asrModel) }
     }
 
+    /// Код на езика ("bg", "en") — виж `Languages`.
     var language: String {
-        didSet { defaults.set(language, forKey: Key.language) }
+        didSet {
+            let normalized = Languages.normalize(language)
+            if normalized != language {
+                language = normalized
+                return
+            }
+            defaults.set(language, forKey: Key.language)
+        }
     }
 
     var reminderOffsetMinutes: Int {
@@ -87,7 +95,7 @@ final class Settings {
         asrBaseURL = defaults.string(forKey: Key.asrBase) ?? ""
         asrAPIKey = defaults.string(forKey: Key.asrKey) ?? ""
         asrModel = defaults.string(forKey: Key.asrModel) ?? ""
-        language = defaults.string(forKey: Key.language) ?? "bg"
+        language = Languages.normalize(defaults.string(forKey: Key.language) ?? Languages.defaultCode)
         reminderOffsetMinutes = defaults.integer(forKey: Key.reminderOffset)
         deleteAudioAfterTranscript = defaults.bool(forKey: Key.deleteAudio)
         autoProcess = defaults.bool(forKey: Key.autoProcess)
