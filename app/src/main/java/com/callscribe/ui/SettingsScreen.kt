@@ -25,6 +25,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +62,12 @@ fun SettingsScreen(model: MainViewModel, onRequestPermissions: () -> Unit) {
     var asrKey by remember { mutableStateOf(settings.asrApiKey) }
     var asrModel by remember { mutableStateOf(settings.asrModel) }
     var language by remember { mutableStateOf(settings.language) }
+
+    // Щом потребителят напусне настройките, пробваме наново всичко, което е спряло
+    // с грешка — обикновено защото ключът тепърва е бил въведен.
+    DisposableEffect(Unit) {
+        onDispose { model.syncNow() }
+    }
 
     Column(
         modifier = Modifier

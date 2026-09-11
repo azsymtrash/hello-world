@@ -3,6 +3,7 @@ package com.callscribe.work
 import android.Manifest
 import android.content.Context
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -12,6 +13,7 @@ import androidx.work.WorkerParameters
 import com.callscribe.capture.Contacts
 import com.callscribe.capture.SmsImporter
 import com.callscribe.data.AppDatabase
+import com.callscribe.data.CaptureStatus
 import com.callscribe.data.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,10 +44,23 @@ class SmsSyncWorker(
                 .onSuccess { settings.lastSmsImportAt = startedAt }
         }
 
-        // Захранва наново източниците, застинали заради грешка или липсваща мрежа.
+        val dao = AppDatabase.get(context).captureDao()
+
+        // Захранва наново източниците, застинали по средата на обработката.
         runCatching {
-            AppDatabase.get(context).captureDao().pending().forEach { capture ->
+            dao.pending().forEach { capture ->
                 ProcessCaptureWorker.enqueue(context, capture.id)
+            }
+        }
+
+        // След отваряне на приложението или ръчна проверка пробваме наново и това,
+        // което е спряло с грешка — най-често защото ключът още не е бил въведен.
+        if (inputData.getBoolean(KEY_RETRY_FAILED, false)) {
+            runCatching {
+                dao.failed().forEach { capture ->
+                    dao.update(capture.copy(status = CaptureStatus.NEW, error = null))
+                    ProcessCaptureWorker.enqueue(context, capture.id)
+                }
             }
         }
 
@@ -53,6 +68,7 @@ class SmsSyncWorker(
     }
 
     companion object {
+        private const val KEY_RETRY_FAILED = "retry_failed"
         private const val UNIQUE_PERIODIC = "sms-sync-periodic"
         private const val UNIQUE_ONCE = "sms-sync-once"
         private const val DEFAULT_LOOKBACK_MS = 24L * 60 * 60 * 1000
@@ -71,9 +87,15 @@ class SmsSyncWorker(
             WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_PERIODIC)
         }
 
-        /** Еднократно засичане веднага — при отваряне на приложението или ръчно. */
+        /**
+         * Еднократно засичане веднага — при отваряне на приложението или ръчно.
+         * За разлика от периодичния цикъл, тук се пробват наново и провалените
+         * източници, защото точно тогава потребителят е оправил настройките.
+         */
         fun syncNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<SmsSyncWorker>().build()
+            val request = OneTimeWorkRequestBuilder<SmsSyncWorker>()
+                .setInputData(Data.Builder().putBoolean(KEY_RETRY_FAILED, true).build())
+                .build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(UNIQUE_ONCE, ExistingWorkPolicy.REPLACE, request)
         }

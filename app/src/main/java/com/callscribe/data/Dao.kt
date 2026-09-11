@@ -27,6 +27,9 @@ interface CaptureDao {
     @Query("SELECT * FROM captures WHERE status IN ('NEW','TRANSCRIBING','ANALYZING') ORDER BY startedAt ASC")
     suspend fun pending(): List<Capture>
 
+    @Query("SELECT * FROM captures WHERE status = 'ERROR' ORDER BY startedAt ASC LIMIT 50")
+    suspend fun failed(): List<Capture>
+
     @Query("SELECT COUNT(*) FROM captures WHERE kind = 'SMS' AND phone = :phone AND text = :text AND ABS(startedAt - :at) < 60000")
     suspend fun countSimilarSms(phone: String?, text: String?, at: Long): Int
 }
